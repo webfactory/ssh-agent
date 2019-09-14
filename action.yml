@@ -11,5 +11,5 @@ runs:
     using: 'node12'
     main: 'dist/index.js'
 branding:
-    icon: 'key'
+    icon: loader
     color: 'yellow'
