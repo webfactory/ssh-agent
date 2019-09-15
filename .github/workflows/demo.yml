@@ -1,0 +1,19 @@
+on: [push, pull_request]
+
+jobs:
+    load_key_demo:
+        strategy:
+            matrix:
+                os: [ubuntu-latest, macOS-latest]
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/checkout@v1
+            - name: Setup key
+              uses: ./
+              with:
+                  ssh-private-key: ${{ secrets.DEMO_KEY }}
+            - run: |
+                ssh-add -l
+                echo SSH_AUTH_SOCK is at $SSH_AUTH_SOCK
+
+
