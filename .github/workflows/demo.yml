@@ -1,0 +1,18 @@
+on: [push]
+
+jobs:
+    load_key_demo:
+        strategy:
+            matrix:
+                os: [ubuntu-latest, macOS-latest]
+        runs-on: ${{ matrix.os }}
+        steps:
+            - name: Setup key
+              uses: webfactory/ssh-agent@master
+              with:
+                  ssh-private-key: ${{ secrets.DEMO_KEY }}
+            - run: |
+                ssh-add -l
+                printenv
+
+
