@@ -7,8 +7,9 @@ jobs:
                 os: [ubuntu-latest, macOS-latest]
         runs-on: ${{ matrix.os }}
         steps:
+            - uses: actions/checkout@v1
             - name: Setup key
-              uses: webfactory/ssh-agent@master
+              uses: ./
               with:
                   ssh-private-key: ${{ secrets.DEMO_KEY }}
             - run: |
