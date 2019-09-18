@@ -27,7 +27,7 @@ jobs:
         ...
         steps:
             - actions/checkout@v1
-            - uses: webfactory/ssh-agent@v0.1
+            - uses: webfactory/ssh-agent@v0.1.1
               with:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
             - ... other steps
