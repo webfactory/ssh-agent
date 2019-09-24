@@ -27,7 +27,9 @@ jobs:
         ...
         steps:
             - actions/checkout@v1
-            - uses: webfactory/ssh-agent@v0.1
+            # Make sure the @v0.1.1 matches the current version of the
+            # action 
+            - uses: webfactory/ssh-agent@v0.1.1
               with:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
             - ... other steps
@@ -76,6 +78,7 @@ As a note to my future self, in order to work on this repo:
 * `node index.js` (inputs are passed through `INPUT_` env vars, but how to set `ssh-private-key`?)
 * Run `./node_modules/.bin/ncc build index.js` to update `dist/index.js`, which is the file actually run
 * Read https://help.github.com/en/articles/creating-a-javascript-action if unsure.
+* Maybe update the README example when publishing a new version.
 
 ## Credits, Copyright and License
 
