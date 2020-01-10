@@ -15,10 +15,10 @@ GitHub Actions only have access to the repository they run for. So, in order to 
 ## Usage
 
 1. Create an SSH key with sufficient access privileges. For security reasons, don't use your personal SSH key but set up a dedicated one for use in GitHub Actions. See below for a few hints if you are unsure about this step.
-2. In your repository, go to the *Settings > Secrets* menu and create a new secret called `SSH_PRIVATE_KEY`. Put the *unencrypted private* SSH key in `PEM` format into the contents field. <br>
-  This key should start with `-----BEGIN RSA PRIVATE KEY-----`, consist of many lines and ends with `-----END RSA PRIVATE KEY-----`. 
-  You can just copy the key as-is from the private key file.
-3. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v1` line.
+2. Make sure you don't have a passphrase set on the private key.
+3. In your repository, go to the *Settings > Secrets* menu and create a new secret. In this example, we'll call it `SSH_PRIVATE_KEY`. Put the contents of the *private* SSH key file into the contents field. <br>
+  This key should start with `-----BEGIN ... PRIVATE KEY-----`, consist of many lines and ends with `-----END ... PRIVATE KEY-----`. 
+4. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v1` line.
 
 ```yaml
 # .github/workflows/my-workflow.yml
@@ -34,7 +34,28 @@ jobs:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
             - ... other steps
 ```
-4. If, for some reason, you need to change the location of the SSH agent socket, you can use the `ssh-auth-sock` input to provide a path.
+5. If, for some reason, you need to change the location of the SSH agent socket, you can use the `ssh-auth-sock` input to provide a path.
+
+### Using multiple keys
+
+There are cases where you might need to use multiple keys. For example, "deployment keys" might be limited to a single repository each.
+
+In that case, you can set-up the different keys as multiple secrets and pass them all to the action like so:
+
+```yaml
+# ... contens as before
+            - uses: webfactory/ssh-agent@v0.1.1
+              with:
+                  ssh-private-key: |
+                        ${{ secrets.FIRST_KEY }}
+                        ${{ secrets.NEXT_KEY }}
+                        ${{ secrets.ANOTHER_KEY }}
+```
+
+The `ssh-agent` will load all of the keys and try each one in order when establishing SSH connections.
+
+There's one **caveat**, though: SSH servers may abort the connection attempt after a number of mismatching keys have been presented. So if, for example, you have
+six different keys loaded into the `ssh-agent`, but the server aborts after five unknown keys, the last key (which might be the right one) will never even be tried.
 
 ## Known issues and limitations
 
@@ -72,11 +93,12 @@ As a side note, using `ssh-keyscan` without proper key verification is susceptib
 
 ## Creating SSH keys
 
-In order to create a new SSH key, run `ssh-keygen -t rsa -b 4096 -m pem -f path/to/keyfile`. This will prompt you for a key passphrase and save the key in `path/to/keyfile`.
+In order to create a new SSH key, run `ssh-keygen -t ed25519 -a 100 -f path/to/keyfile`, as suggested in [this blog post](https://stribika.github.io/2015/01/04/secure-secure-shell.html). 
+If you need to work with some older server software and need RSA keys, tr `ssh-keygen -t rsa -b 4096 -o -f path/to/keyfile` instead.
 
-Having a passphrase is a good thing, since it will keep the key encrypted on your disk. When configuring the secret `SSH_PRIVATE_KEY` value in your repository, however, you will need the private key *unencrypted*. 
-
-To show the private key unencrypted, run `openssl rsa -in path/to/key -outform pem`.
+Both commands will prompt you for a key passphrase and save the key in `path/to/keyfile`.
+In general, having a passphrase is a good thing, since it will keep the key encrypted on your disk. When using the key with this action, however, you need to make sure you don't 
+specify a passphrase: The key must be usable without reading the passphrase from input. Since the key itself is stored using GitHub's "Secret" feature, it should be fairly safe anyway.
 
 ## Authorizing a key
 
@@ -93,7 +115,7 @@ As a note to my future self, in order to work on this repo:
 * Clone it
 * Run `npm install` to fetch dependencies
 * _hack hack hack_
-* `node index.js` (inputs are passed through `INPUT_` env vars, but how to set `ssh-private-key`?)
+* `node index.js`. Inputs are passed through `INPUT_` env vars with their names uppercased. Use `env "INPUT_SSH-PRIVATE-KEY=\`cat file\`" node index.js` for this action.
 * Run `./node_modules/.bin/ncc build index.js` to update `dist/index.js`, which is the file actually run
 * Read https://help.github.com/en/articles/creating-a-javascript-action if unsure.
 * Maybe update the README example when publishing a new version.
