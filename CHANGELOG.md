@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v0.2.0
+
 ### Added
 
 * Multiple SSH keys can now be provided (#14, closes #7). Thanks to

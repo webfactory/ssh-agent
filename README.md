@@ -27,9 +27,9 @@ jobs:
         ...
         steps:
             - actions/checkout@v1
-            # Make sure the @v0.1.1 matches the current version of the
+            # Make sure the @v0.2.0 matches the current version of the
             # action 
-            - uses: webfactory/ssh-agent@v0.1.1
+            - uses: webfactory/ssh-agent@v0.2.0
               with:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
             - ... other steps
@@ -44,7 +44,7 @@ In that case, you can set-up the different keys as multiple secrets and pass the
 
 ```yaml
 # ... contens as before
-            - uses: webfactory/ssh-agent@v0.1.1
+            - uses: webfactory/ssh-agent@v0.2.0
               with:
                   ssh-private-key: |
                         ${{ secrets.FIRST_KEY }}
