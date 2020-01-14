@@ -58,8 +58,17 @@ const child_process = __webpack_require__(129);
 const fs = __webpack_require__(747);
 
 try {
+
     const home = process.env['HOME'];
     const homeSsh = home + '/.ssh';
+
+    const privateKey = core.getInput('ssh-private-key').trim();
+
+    if (!privateKey) {
+        core.setFailed("The ssh-private-key argument is empty. Maybe the secret has not been configured, or you are using a wrong secret name in your workflow file.");
+
+        return;
+    }
 
     console.log(`Adding GitHub.com keys to ${homeSsh}/known_hosts`);
     fs.mkdirSync(homeSsh, { recursive: true});
@@ -72,11 +81,13 @@ try {
     core.exportVariable('SSH_AUTH_SOCK', authSock);
 
     console.log("Adding private key to agent");
-    core.getInput('ssh-private-key').split(/(?=-----BEGIN)/).forEach(function(key) {
+    privateKey.split(/(?=-----BEGIN)/).forEach(function(key) {
         child_process.execSync('ssh-add -', { input: key.trim() + "\n" });
     });
+
     console.log("Keys added:");
     child_process.execSync('ssh-add -l', { stdio: 'inherit' });
+
 } catch (error) {
     core.setFailed(error.message);
 }
