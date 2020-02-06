@@ -7,7 +7,7 @@ try {
     const home = process.env['HOME'];
     const homeSsh = home + '/.ssh';
 
-    const privateKey = core.getInput('ssh-private-key').trim();
+    const privateKey = core.getInput('ssh-private-key');
 
     if (!privateKey) {
         core.setFailed("The ssh-private-key argument is empty. Maybe the secret has not been configured, or you are using a wrong secret name in your workflow file.");
