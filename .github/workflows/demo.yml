@@ -1,7 +1,7 @@
 on: [push, pull_request]
 
 jobs:
-    single_key_demo:
+    multiple_key_demo:
         strategy:
             matrix:
                 os: [ubuntu-latest, macOS-latest]
@@ -15,7 +15,7 @@ jobs:
                     ${{ secrets.DEMO_KEY }}
                     ${{ secrets.DEMO_KEY_2 }}
 
-    multiple_keys_demo:
+    single_key_demo:
         strategy:
             matrix:
                 os: [ubuntu-latest, macOS-latest]
