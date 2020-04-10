@@ -22,8 +22,21 @@ try {
 
     console.log("Starting ssh-agent");
     const authSock = core.getInput('ssh-auth-sock');
-    child_process.execFileSync('ssh-agent', ['-a', authSock]);
-    core.exportVariable('SSH_AUTH_SOCK', authSock);
+    let sshAgentOutput = ''
+    if (authSock && authSock.length > 0) {
+        sshAgentOutput = child_process.execFileSync('ssh-agent', ['-a', authSock]);
+    } else {
+        sshAgentOutput = child_process.execFileSync('ssh-agent')
+    }
+
+    // Extract auth socket path and agent pid and set them as job variables
+    const lines = sshAgentOutput.toString().split("\n")
+    for (const lineNumber in lines) {
+        const matches = /^(SSH_AUTH_SOCK|SSH_AGENT_PID)=(.*); export \1/.exec(lines[lineNumber])
+        if (matches && matches.length > 0) {
+            core.exportVariable(matches[1], matches[2])
+        }
+    }
 
     console.log("Adding private key to agent");
     privateKey.split(/(?=-----BEGIN)/).forEach(function(key) {
