@@ -57,6 +57,20 @@ The `ssh-agent` will load all of the keys and try each one in order when establi
 There's one **caveat**, though: SSH servers may abort the connection attempt after a number of mismatching keys have been presented. So if, for example, you have
 six different keys loaded into the `ssh-agent`, but the server aborts after five unknown keys, the last key (which might be the right one) will never even be tried.
 
+## Exported variables
+The action exports `SSH_AUTH_SOCK` and `SSH_AGENT_PID` through the Github Actions core module.
+The `$SSH_AUTH_SOCK` is used by several applications like git or rsync to connect to the SSH authentication agent.
+The `$SSH_AGENT_PID` can be used to kill the SSH agent, e.g. when using on a self-hosted runner:
+```yaml
+jobs:
+    job_1:
+        steps:
+            # ...
+            -   name: Stop SSH agent
+                run: kill $SSH_AGENT_PID
+```
+The variables are only available inside the current job. 
+
 ## Known issues and limitations
 
 ### Currently OS X and Linux only
