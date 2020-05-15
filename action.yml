@@ -9,6 +9,7 @@ inputs:
 runs:
     using: 'node12'
     main: 'dist/index.js'
+    post: 'dist/cleanup.js'
 branding:
     icon: loader
     color: 'yellow'

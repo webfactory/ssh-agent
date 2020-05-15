@@ -7,8 +7,10 @@
     "author": "webfactory GmbH <info@webfactory.de>",
     "license": "MIT",
     "devDependencies": {
-        "@actions/core": "^1.1.0",
-        "@zeit/ncc": "^0.20.5",
-        "child_process": "^1.0.2"
+        "@actions/core": "^1.2.4",
+        "@zeit/ncc": "^0.20.5"
+    },
+    "scripts": {
+        "build": "node scripts/build.js"
     }
 }

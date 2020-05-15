@@ -130,7 +130,7 @@ As a note to my future self, in order to work on this repo:
 * Run `npm install` to fetch dependencies
 * _hack hack hack_
 * `node index.js`. Inputs are passed through `INPUT_` env vars with their names uppercased. Use `env "INPUT_SSH-PRIVATE-KEY=\`cat file\`" node index.js` for this action.
-* Run `./node_modules/.bin/ncc build index.js` to update `dist/index.js`, which is the file actually run
+* Run `npm run build` to update `dist/*`, which is the file actually run
 * Read https://help.github.com/en/articles/creating-a-javascript-action if unsure.
 * Maybe update the README example when publishing a new version.
 
