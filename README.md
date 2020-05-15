@@ -60,16 +60,7 @@ six different keys loaded into the `ssh-agent`, but the server aborts after five
 ## Exported variables
 The action exports `SSH_AUTH_SOCK` and `SSH_AGENT_PID` through the Github Actions core module.
 The `$SSH_AUTH_SOCK` is used by several applications like git or rsync to connect to the SSH authentication agent.
-The `$SSH_AGENT_PID` can be used to kill the SSH agent, e.g. when using on a self-hosted runner:
-```yaml
-jobs:
-    job_1:
-        steps:
-            # ...
-            -   name: Stop SSH agent
-                run: kill $SSH_AGENT_PID
-```
-The variables are only available inside the current job. 
+The `$SSH_AGENT_PID` contains the process id of the agent. This is used to kill the agent in post job action.
 
 ## Known issues and limitations
 
@@ -130,7 +121,7 @@ As a note to my future self, in order to work on this repo:
 * Run `npm install` to fetch dependencies
 * _hack hack hack_
 * `node index.js`. Inputs are passed through `INPUT_` env vars with their names uppercased. Use `env "INPUT_SSH-PRIVATE-KEY=\`cat file\`" node index.js` for this action.
-* Run `npm run build` to update `dist/*`, which is the file actually run
+* Run `npm run build` to update `dist/*`, which holds the files actually run
 * Read https://help.github.com/en/articles/creating-a-javascript-action if unsure.
 * Maybe update the README example when publishing a new version.
 
