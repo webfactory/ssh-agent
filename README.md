@@ -57,6 +57,11 @@ The `ssh-agent` will load all of the keys and try each one in order when establi
 There's one **caveat**, though: SSH servers may abort the connection attempt after a number of mismatching keys have been presented. So if, for example, you have
 six different keys loaded into the `ssh-agent`, but the server aborts after five unknown keys, the last key (which might be the right one) will never even be tried.
 
+## Exported variables
+The action exports `SSH_AUTH_SOCK` and `SSH_AGENT_PID` through the Github Actions core module.
+The `$SSH_AUTH_SOCK` is used by several applications like git or rsync to connect to the SSH authentication agent.
+The `$SSH_AGENT_PID` contains the process id of the agent. This is used to kill the agent in post job action.
+
 ## Known issues and limitations
 
 ### Currently OS X and Linux only
@@ -116,7 +121,7 @@ As a note to my future self, in order to work on this repo:
 * Run `npm install` to fetch dependencies
 * _hack hack hack_
 * `node index.js`. Inputs are passed through `INPUT_` env vars with their names uppercased. Use `env "INPUT_SSH-PRIVATE-KEY=\`cat file\`" node index.js` for this action.
-* Run `./node_modules/.bin/ncc build index.js` to update `dist/index.js`, which is the file actually run
+* Run `npm run build` to update `dist/*`, which holds the files actually run
 * Read https://help.github.com/en/articles/creating-a-javascript-action if unsure.
 * Maybe update the README example when publishing a new version.
 
