@@ -6,5 +6,6 @@ try {
     console.log('Stopping SSH agent')
     execSync('kill ${SSH_AGENT_PID}', { stdio: 'inherit' })
 } catch (error) {
-    core.setFailed(error.message)
+    console.log(error.message);
+    console.log('Error stopping the SSH agent, proceeding anyway');
 }

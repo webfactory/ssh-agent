@@ -118,7 +118,7 @@ To actually grant the SSH key access, you can – on GitHub – use at least two
 As a note to my future self, in order to work on this repo:
 
 * Clone it
-* Run `npm install` to fetch dependencies
+* Run `yarn install` to fetch dependencies
 * _hack hack hack_
 * `node index.js`. Inputs are passed through `INPUT_` env vars with their names uppercased. Use `env "INPUT_SSH-PRIVATE-KEY=\`cat file\`" node index.js` for this action.
 * Run `npm run build` to update `dist/*`, which holds the files actually run
