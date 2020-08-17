@@ -4,8 +4,16 @@ inputs:
     ssh-private-key:
         description: 'Private SSH key to register in the SSH agent'
         required: true
+    repo-mappings:
+        description: 'Git Repo Mappings, order and count must match ssh-private-key'
+        required: false
     ssh-auth-sock:
         description: 'Where to place the SSH Agent auth socket'
+        required: false
+    drop-extra-header:
+        description: 'Remove the .gitconfig http.extraheader auth token added by actions/checkout@v2'
+        required: false
+
 runs:
     using: 'node12'
     main: 'dist/index.js'

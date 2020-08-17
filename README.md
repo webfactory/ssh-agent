@@ -50,16 +50,41 @@ You can set up different keys as different secrets and pass them all to the acti
                         ${{ secrets.FIRST_KEY }}
                         ${{ secrets.NEXT_KEY }}
                         ${{ secrets.ANOTHER_KEY }}
+                  repo-mappings: |
+                        github.com/OWNERX/REPO1
+                        bitbucket.com/OWNERY/REPO2
+                        github.com/OWNERX/REPO3
 ```
 
 The `ssh-agent` will load all of the keys and try each one in order when establishing SSH connections.
 
-There's one **caveat**, though: SSH servers may abort the connection attempt after a number of mismatching keys have been presented. So if, for example, you have
-six different keys loaded into the `ssh-agent`, but the server aborts after five unknown keys, the last key (which might be the right one) will never even be tried. 
+Optionally, `repo-mappings` provides a list of git repos that correlate to the keys provided. If you specify `repo-mappings` you **MUST** specify the same number mappings as you provided `ssh-private-key` entries and they **MUST** be in the same order. Each mapping **MUST** be in the format of `{HOSTNAME}/{OWNER}/{REPO}` without any *https://*, *git@* , or *ssh://* prefix and using **slashes** not the mixed slashes and colons used in the ssh format.
+
+These mappings are used to generate git config `insteadOf` entries to psuedo hostnames, where the pseudo hostnames are each assigned the associated `ssh-private-key`. See the [Repo Mappings](#repo-mappings) section for details on how this works.
+
+There's one **caveat**, though, if you're not using `repo-mappings`: SSH servers may abort the connection attempt after a number of mismatching keys have been presented. So if, for example, you have
+six different keys loaded into the `ssh-agent`, but the server aborts after five unknown keys, the last key (which might be the right one) will never even be tried.
 
 Also, when using **Github deploy keys**, GitHub servers will accept the first known key. But since deploy keys are scoped to a single repository, you might get the error message `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.` if the wrong key/repository combination is tried.
 
 In both cases, you might want to [try a wrapper script around `ssh`](https://gist.github.com/mpdude/e56fcae5bc541b95187fa764aafb5e6d) that can pick the right key, based on key comments. See [our blog post](https://www.webfactory.de/blog/using-multiple-ssh-deploy-keys-with-github) for the full story.
+
+### Dropping the http.extraHeader added by actions/checkout@v2
+If you are using (actions/checkout@v2)[], it adds an `AUTHORIZATION: basic ${GITHUB_TOKEN}` header to all git calls. This header can conflict with the `repo-mappings` in some apps (like `go get`). If you are having issues, try setting this option to `true`.
+```yaml
+# ... contens as before
+            - uses: webfactory/ssh-agent@v0.4.0
+              with:
+                  ssh-private-key: |
+                        ${{ secrets.FIRST_KEY }}
+                        ${{ secrets.NEXT_KEY }}
+                        ${{ secrets.ANOTHER_KEY }}
+                  repo-mappings: |
+                        github.com/OWNERX/REPO1
+                        bitbucket.com/OWNERY/REPO2
+                        github.com/OWNERX/REPO3
+                  drop-extra-header: true
+```
 
 ## Exported variables
 The action exports the `SSH_AUTH_SOCK` and `SSH_AGENT_PID` environment variables through the Github Actions core module.
@@ -117,6 +142,66 @@ To actually grant the SSH key access, you can – on GitHub – use at least two
 
 * A [machine user](https://developer.github.com/v3/guides/managing-deploy-keys/#machine-users) can be used for more fine-grained permissions management and have access to multiple repositories with just one instance of the key being registered. It will, however, count against your number of users on paid GitHub plans.
 
+## Repo Mappings
+When git connects over SSH, it sends the target path [see git connect.c](https://github.com/git/git/blob/e870325/connect.c#L1254), but GitHub glady accepts any valid ssh key without ensuring access to the specified path, only to then return 404. In order to work around this, we do three things:
+1. Parse `repo-mappings`
+2. Create git config `insteadOf` url-rewrite rules
+2. Configure per-host ssh details
+
+### Parse repo-mappings
+Each mapping **MUST** be in the format of `{HOSTNAME}/{OWNER}/{REPO}` without any *https://*, *git@* , or *ssh://* prefix and using **slashes** not the mixed slashes and colons used in the ssh format. For the next two sections, we will use the following as our example mapping:
+```
+github.com/webfactory/ssh-agent
+```
+
+### insteadOf Entries
+- A pseudo hostname is established using `{REPO}.{HOSTNAME}` (example: `ssh-agent.github.com`).
+- insteadOf entries are created in the **global** .gitconfig file for both https and ssh, forcing them to use the pseudo hostname over ssh:
+  ```
+  git config url."git@http.{PSEUDOHOST}:{OWNER}/{REPO}".insteadOf "https://{HOSTNAME}/{OWNER}/{REPO}"
+  git config url."git@ssh.{PSEUDOHOST}:{OWNER}/{REPO}".insteadOf "git@{HOSTNAME}:{OWNER}/{REPO}";
+  ```
+- The resulting .gitconfig looks something like (using the example):
+  ```
+  [url "git@github.com:webfactory/ssh-agent"]
+	  insteadOf = https://ssh-agent.github.com/webfactory/ssh-agent
+  [url "git@github.com:webfactory/ssh-agent"]
+	  insteadOf = git@github.com:webfactory/ssh-agent
+  ```
+
+### Per-host SSH Entries
+For each mapping/key pair, we create custom named entries in `~/.ssh/config`:
+```
+Host http.{PSEUDOHOST}
+        HostName {HOSTNAME}
+        User git
+        IdentityFile ~/.ssh/{PSEUDOHOST}
+        IdentitiesOnly yes
+
+Host ssh.{PSEUDOHOST}
+        HostName {HOSTNAME}
+        User git
+        IdentityFile ~/.ssh/{PSEUDOHOST}
+        IdentitiesOnly yes
+```
+
+For the example, that is:
+```
+Host http.ssh-agent.github.com
+        HostName github.com
+        User git
+        IdentityFile ~/.ssh/ssh-agent.github.com
+        IdentitiesOnly yes
+
+Host ssh.ssh-agent.github.com
+        HostName github.com
+        User git
+        IdentityFile ~/.ssh/ssh-agent.github.com
+        IdentitiesOnly yes
+```
+
+Also note that we set `IdentitiesOnly`, which prevents ssh from trying every key when connecting to a host. This helps the caveat for (Using multiple keys)[#using-multiple-keys].
+
 ## Hacking
 
 As a note to my future self, in order to work on this repo:
@@ -124,7 +209,24 @@ As a note to my future self, in order to work on this repo:
 * Clone it
 * Run `yarn install` to fetch dependencies
 * _hack hack hack_
-* `node index.js`. Inputs are passed through `INPUT_` env vars with their names uppercased. Use `env "INPUT_SSH-PRIVATE-KEY=\`cat file\`" node index.js` for this action.
+* `node index.js`. Inputs are passed through `INPUT_` env vars with their names uppercased.
+
+  On *nix use:
+  ```bash
+  env "INPUT_SSH-PRIVATE-KEY=\`cat file\`" node index.js
+  ```
+
+  On Windows (cmd):
+  ```cmd
+  set /P INPUT_SSH-PRIVATE-KEY=< file
+  node index.js
+  ```
+
+  On Windows (PowerShell):
+  ```ps
+  ${env:INPUT_SSH-PRIVATE-KEY} = (Get-Content .\test-keys -Raw); node index.js
+  node index.js
+  ```
 * Run `npm run build` to update `dist/*`, which holds the files actually run
 * Read https://help.github.com/en/articles/creating-a-javascript-action if unsure.
 * Maybe update the README example when publishing a new version.
