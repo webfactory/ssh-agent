@@ -38,9 +38,9 @@ jobs:
 
 ### Using multiple keys
 
-There are cases where you might need to use multiple keys. For example, "deployment keys" might be limited to a single repository each.
+There are cases where you might need to use multiple keys. For example, "[deploy keys](https://docs.github.com/en/developers/overview/managing-deploy-keys#deploy-keys)" might be limited to a single repository, so you'll need several of them.
 
-In that case, you can set-up the different keys as multiple secrets and pass them all to the action like so:
+You can set up different keys as different secrets and pass them all to the action like so:
 
 ```yaml
 # ... contens as before
@@ -55,7 +55,11 @@ In that case, you can set-up the different keys as multiple secrets and pass the
 The `ssh-agent` will load all of the keys and try each one in order when establishing SSH connections.
 
 There's one **caveat**, though: SSH servers may abort the connection attempt after a number of mismatching keys have been presented. So if, for example, you have
-six different keys loaded into the `ssh-agent`, but the server aborts after five unknown keys, the last key (which might be the right one) will never even be tried. If you don't need all of the keys at the same time, you could try to `run: kill $SSH_AGENT_PID` to kill the currently running `ssh-agent` and use the action again in a following step to start another instance.
+six different keys loaded into the `ssh-agent`, but the server aborts after five unknown keys, the last key (which might be the right one) will never even be tried. 
+
+Also, when using **Github deploy keys**, GitHub servers will accept the first known key. But since deploy keys are scoped to a single repository, you might get the error message `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.` if the wrong key/repository combination is tried.
+
+In both cases, you might want to [try a wrapper script around `ssh`](https://gist.github.com/mpdude/e56fcae5bc541b95187fa764aafb5e6d) that can pick the right key, based on key comments. See [our blog post](https://www.webfactory.de/blog/using-multiple-ssh-deploy-keys-with-github) for the full story.
 
 ## Exported variables
 The action exports the `SSH_AUTH_SOCK` and `SSH_AGENT_PID` environment variables through the Github Actions core module.
