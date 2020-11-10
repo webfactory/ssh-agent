@@ -26,6 +26,3 @@ jobs:
               uses: ./
               with:
                   ssh-private-key: ${{ secrets.DEMO_KEY }}
-              
-              
-
