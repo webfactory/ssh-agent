@@ -27,9 +27,9 @@ jobs:
         ...
         steps:
             - actions/checkout@v1
-            # Make sure the @v0.2.0 matches the current version of the
+            # Make sure the @v0.4.1 matches the current version of the
             # action 
-            - uses: webfactory/ssh-agent@v0.2.0
+            - uses: webfactory/ssh-agent@v0.4.1
               with:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
             - ... other steps
@@ -38,13 +38,13 @@ jobs:
 
 ### Using multiple keys
 
-There are cases where you might need to use multiple keys. For example, "deployment keys" might be limited to a single repository each.
+There are cases where you might need to use multiple keys. For example, "[deploy keys](https://docs.github.com/en/developers/overview/managing-deploy-keys#deploy-keys)" might be limited to a single repository, so you'll need several of them.
 
-In that case, you can set-up the different keys as multiple secrets and pass them all to the action like so:
+You can set up different keys as different secrets and pass them all to the action like so:
 
 ```yaml
 # ... contens as before
-            - uses: webfactory/ssh-agent@v0.2.0
+            - uses: webfactory/ssh-agent@v0.4.1
               with:
                   ssh-private-key: |
                         ${{ secrets.FIRST_KEY }}
@@ -55,7 +55,16 @@ In that case, you can set-up the different keys as multiple secrets and pass the
 The `ssh-agent` will load all of the keys and try each one in order when establishing SSH connections.
 
 There's one **caveat**, though: SSH servers may abort the connection attempt after a number of mismatching keys have been presented. So if, for example, you have
-six different keys loaded into the `ssh-agent`, but the server aborts after five unknown keys, the last key (which might be the right one) will never even be tried.
+six different keys loaded into the `ssh-agent`, but the server aborts after five unknown keys, the last key (which might be the right one) will never even be tried. 
+
+Also, when using **Github deploy keys**, GitHub servers will accept the first known key. But since deploy keys are scoped to a single repository, you might get the error message `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.` if the wrong key/repository combination is tried.
+
+In both cases, you might want to [try a wrapper script around `ssh`](https://gist.github.com/mpdude/e56fcae5bc541b95187fa764aafb5e6d) that can pick the right key, based on key comments. See [our blog post](https://www.webfactory.de/blog/using-multiple-ssh-deploy-keys-with-github) for the full story.
+
+## Exported variables
+The action exports the `SSH_AUTH_SOCK` and `SSH_AGENT_PID` environment variables through the Github Actions core module.
+The `$SSH_AUTH_SOCK` is used by several applications like git or rsync to connect to the SSH authentication agent.
+The `$SSH_AGENT_PID` contains the process id of the agent. This is used to kill the agent in post job action.
 
 ## Known issues and limitations
 
@@ -83,7 +92,7 @@ When using `ssh` to connect from the GitHub Action worker node to another machin
 
 ### Provide the SSH key as a file
 
-This Action is designed to pass the SSH directly into `ssh-agent`; that is, the key is available in memory on the GitHub Action worker node, but never written to disk. As a consequence, you _cannot_ pass the key as a build argument or a mounted file into Docker containers that you build or run on the worker node. You _can_, however, mount the `ssh-agent` Unix socket into a Docker container that you _run_, set up the `SSH_AUTH_SOCK` env var and then use SSH from within the container (see #11).
+This Action is designed to pass the SSH key directly into `ssh-agent`; that is, the key is available in memory on the GitHub Action worker node, but never written to disk. As a consequence, you _cannot_ pass the key as a build argument or a mounted file into Docker containers that you build or run on the worker node. You _can_, however, mount the `ssh-agent` Unix socket into a Docker container that you _run_, set up the `SSH_AUTH_SOCK` env var and then use SSH from within the container (see #11).
 
 ### Run `ssh-keyscan` to add host keys for additional hosts
 
@@ -104,7 +113,7 @@ specify a passphrase: The key must be usable without reading the passphrase from
 
 To actually grant the SSH key access, you can – on GitHub – use at least two ways:
 
-* [Deploy keys](https://developer.github.com/v3/guides/managing-deploy-keys/#deploy-keys) can be added to individual GitHub repositories. They can give read and/or write access to the particular repository. When pulling a lot of dependencies, however, you'll end up adding the key in many places. Rotating the key probably becomes difficult.
+* [Deploy keys](https://developer.github.com/v3/guides/managing-deploy-keys/#deploy-keys) can be added to individual GitHub repositories. They can give read and/or write access to the particular repository. When pulling a lot of dependencies, however, you'll end up adding the key in many places. Rotating the key probably becomes difficult. The deploy key needs to be added to the private repository that is being fetched as a private dependency.
 
 * A [machine user](https://developer.github.com/v3/guides/managing-deploy-keys/#machine-users) can be used for more fine-grained permissions management and have access to multiple repositories with just one instance of the key being registered. It will, however, count against your number of users on paid GitHub plans.
 
@@ -113,10 +122,10 @@ To actually grant the SSH key access, you can – on GitHub – use at least two
 As a note to my future self, in order to work on this repo:
 
 * Clone it
-* Run `npm install` to fetch dependencies
+* Run `yarn install` to fetch dependencies
 * _hack hack hack_
 * `node index.js`. Inputs are passed through `INPUT_` env vars with their names uppercased. Use `env "INPUT_SSH-PRIVATE-KEY=\`cat file\`" node index.js` for this action.
-* Run `./node_modules/.bin/ncc build index.js` to update `dist/index.js`, which is the file actually run
+* Run `npm run build` to update `dist/*`, which holds the files actually run
 * Read https://help.github.com/en/articles/creating-a-javascript-action if unsure.
 * Maybe update the README example when publishing a new version.
 
