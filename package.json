@@ -7,7 +7,7 @@
     "author": "webfactory GmbH <info@webfactory.de>",
     "license": "MIT",
     "devDependencies": {
-        "@actions/core": "^1.2.4",
+        "@actions/core": "^1.2.6",
         "@zeit/ncc": "^0.20.5"
     },
     "scripts": {
