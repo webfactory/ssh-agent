@@ -69,8 +69,11 @@ ssh-keygen -t ed25519 -a 100 -C "ssh://git@github.com/ORGANIZATION/REPO.git" -m 
 
 ## Exported variables
 The action exports the `SSH_AUTH_SOCK`, `SSH_AGENT_PID` and `GIT_SSH_COMMAND` environment variables through the Github Actions core module.
+
 The `$SSH_AUTH_SOCK` is used by several applications like git or rsync to connect to the SSH authentication agent.
+
 The `$SSH_AGENT_PID` contains the process id of the agent. This is used to kill the agent in post job action.
+
 The `$GIT_SSH_COMMAND` contains the path to the `git-deploy-key-wrapper` shell script. Git will use this value for SSH interactions instead of the SSH executable.
 
 ## Known issues and limitations
