@@ -57,14 +57,20 @@ The `ssh-agent` will load all of the keys and try each one in order when establi
 There's one **caveat**, though: SSH servers may abort the connection attempt after a number of mismatching keys have been presented. So if, for example, you have
 six different keys loaded into the `ssh-agent`, but the server aborts after five unknown keys, the last key (which might be the right one) will never even be tried. 
 
-Also, when using **Github deploy keys**, GitHub servers will accept the first known key. But since deploy keys are scoped to a single repository, you might get the error message `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.` if the wrong key/repository combination is tried.
+You might want to [try a wrapper script around `ssh`](https://gist.github.com/mpdude/e56fcae5bc541b95187fa764aafb5e6d) that can pick the right key, based on key comments. See [our blog post](https://www.webfactory.de/blog/using-multiple-ssh-deploy-keys-with-github) for the full story.
 
-In both cases, you might want to [try a wrapper script around `ssh`](https://gist.github.com/mpdude/e56fcae5bc541b95187fa764aafb5e6d) that can pick the right key, based on key comments. See [our blog post](https://www.webfactory.de/blog/using-multiple-ssh-deploy-keys-with-github) for the full story.
+Also, when using **Github deploy keys**, GitHub servers will accept the first known key. But since deploy keys are scoped to a single repository, you might get the error message `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.` if the wrong key/repository combination is tried.
+For this scenario, you'll want to set `use-git-deploy-key-wrapper` to `true` and create your key with a comment that has the git SSH url in it. For example:
+```
+ssh-keygen -t ed25519 -a 100 -C "ssh://git@github.com/ORGANIZATION/REPO.git" -m PEM -N "" -f ~/.ssh/REPO -q
+```
+**Please note that `git@github.com` is followed by a `/`, not a `:`**
 
 ## Exported variables
-The action exports the `SSH_AUTH_SOCK` and `SSH_AGENT_PID` environment variables through the Github Actions core module.
+The action exports the `SSH_AUTH_SOCK`, `SSH_AGENT_PID` and `GIT_SSH_COMMAND` environment variables through the Github Actions core module.
 The `$SSH_AUTH_SOCK` is used by several applications like git or rsync to connect to the SSH authentication agent.
 The `$SSH_AGENT_PID` contains the process id of the agent. This is used to kill the agent in post job action.
+The `$GIT_SSH_COMMAND` contains the path to the `git-deploy-key-wrapper` shell script. Git will use this value for SSH interactions instead of the SSH executable.
 
 ## Known issues and limitations
 

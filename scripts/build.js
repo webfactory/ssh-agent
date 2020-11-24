@@ -5,9 +5,14 @@ const fs = require('fs')
 const buildDir = path.join(process.cwd(), 'build')
 const distDir = path.join(process.cwd(), 'dist')
 
-const buildIndexJs = path.join(buildDir, 'index.js')
-const distIndexJs = path.join(distDir, 'index.js')
-const distCleanupJs = path.join(distDir, 'cleanup.js')
+const gitSSHWrapperFileName = 'git-deploy-key-wrapper.sh';
+const gitSSHWrapper = path.join(process.cwd(), 'wrapper', gitSSHWrapperFileName);
+
+const buildIndexJs = path.join(buildDir, 'index.js');
+const buildGitSSHWrapper = path.join(buildDir, gitSSHWrapperFileName);
+const distIndexJs = path.join(distDir, 'index.js');
+const distGitSSHWrapper = path.join(distDir, gitSSHWrapperFileName);
+const distCleanupJs = path.join(distDir, 'cleanup.js');
 
 if (!fs.existsSync(buildDir)) {
     fs.mkdirSync(buildDir)
@@ -28,6 +33,13 @@ if (fs.existsSync(distCleanupJs)) {
     fs.unlinkSync(distCleanupJs)
 }
 fs.renameSync(buildIndexJs, distCleanupJs)
+
+console.log(`Copying "${gitSSHWrapperFileName}"`);
+fs.copyFileSync(gitSSHWrapper, buildGitSSHWrapper);
+if (fs.existsSync(distGitSSHWrapper)) {
+    fs.unlinkSync(distGitSSHWrapper);
+}
+fs.renameSync(buildGitSSHWrapper, distGitSSHWrapper);
 
 console.log('Cleaning up...')
 fs.rmdirSync(buildDir)

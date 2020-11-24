@@ -46,6 +46,15 @@ try {
     console.log("Keys added:");
     child_process.execSync('ssh-add -l', { stdio: 'inherit' });
 
+    const useGitSSHWrapper = core.getInput('use-git-deploy-key-wrapper');
+    if(useGitSSHWrapper) {
+        const gitSSHWrapperFileName = 'git-deploy-key-wrapper.sh';
+        const gitSSHWrapperPath = path.join(homeSsh, gitSSHWrapperFileName);
+        fs.copyFileSync(path.join(process.cwd(), gitSSHWrapperFileName), gitSSHWrapperPath);
+        fs.chmodSync(gitSSHWrapperPath, "755");
+
+        core.exportVariable('GIT_SSH_COMMAND', gitSSHWrapperPath);
+    }
 } catch (error) {
     core.setFailed(error.message);
 }
