@@ -63,7 +63,7 @@ You might want to [try a wrapper script around `ssh`](https://gist.github.com/mp
 Also, when using **Github deploy keys**, GitHub servers will accept the first known key. But since deploy keys are scoped to a single repository, you might get the error message `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.` if the wrong key/repository combination is tried.
 For this scenario, you'll want to set `use-git-deploy-key-wrapper` input variable to `true` and create your key with a comment that has the git SSH url in it. For example:
 ```
-ssh-keygen -t ed25519 -a 100 -C "ssh://git@github.com/ORGANIZATION/REPO.git" -m PEM -N "" -f ~/.ssh/REPO -q
+ssh-keygen -t ed25519 -a 100 -C "ssh://git@github.com/ORGANIZATION/REPO.git" -m PEM -N "" -f path/to/keyfile -q
 ```
 **Please note that `git@github.com` is followed by a `/`, not a `:`**
 
