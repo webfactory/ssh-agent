@@ -15,26 +15,27 @@ GitHub Actions only have access to the repository they run for. So, in order to 
 ## Usage
 
 1. Create an SSH key with sufficient access privileges. For security reasons, don't use your personal SSH key but set up a dedicated one for use in GitHub Actions. See below for a few hints if you are unsure about this step.
-2. Make sure you don't have a passphrase set on the private key.
-3. In your repository, go to the *Settings > Secrets* menu and create a new secret. In this example, we'll call it `SSH_PRIVATE_KEY`. Put the contents of the *private* SSH key file into the contents field. <br>
+1. Make sure you don't have a passphrase set on the private key.
+1. In your repository, go to the *Settings > Secrets* menu and create a new secret. In this example, we'll call it `SSH_PRIVATE_KEY`. Put the contents of the *private* SSH key file into the contents field. <br>
   This key should start with `-----BEGIN ... PRIVATE KEY-----`, consist of many lines and ends with `-----END ... PRIVATE KEY-----`. 
-4. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v1` line.
+1. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v1` line.
 
-```yaml
-# .github/workflows/my-workflow.yml
-jobs:
-    my_job:
-        ...
-        steps:
-            - actions/checkout@v1
-            # Make sure the @v0.4.1 matches the current version of the
-            # action 
-            - uses: webfactory/ssh-agent@v0.4.1
-              with:
-                  ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-            - ... other steps
-```
-5. If, for some reason, you need to change the location of the SSH agent socket, you can use the `ssh-auth-sock` input to provide a path.
+   ```yaml
+   # .github/workflows/my-workflow.yml
+   jobs:
+       my_job:
+           ...
+           steps:
+               - actions/checkout@v1
+               # Make sure the @v0.4.1 matches the current version of the
+               # action 
+               - uses: webfactory/ssh-agent@v0.4.1
+                 with:
+                     ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+               - ... other steps
+   ```
+1. If you are using GitHub deploy keys, set the `use-git-deploy-key-wrapper` input variable to `true`.
+1. If, for some reason, you need to change the location of the SSH agent socket, you can use the `ssh-auth-sock` input to provide a path.
 
 ### Using multiple keys
 
@@ -60,7 +61,7 @@ six different keys loaded into the `ssh-agent`, but the server aborts after five
 You might want to [try a wrapper script around `ssh`](https://gist.github.com/mpdude/e56fcae5bc541b95187fa764aafb5e6d) that can pick the right key, based on key comments. See [our blog post](https://www.webfactory.de/blog/using-multiple-ssh-deploy-keys-with-github) for the full story.
 
 Also, when using **Github deploy keys**, GitHub servers will accept the first known key. But since deploy keys are scoped to a single repository, you might get the error message `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.` if the wrong key/repository combination is tried.
-For this scenario, you'll want to set `use-git-deploy-key-wrapper` to `true` and create your key with a comment that has the git SSH url in it. For example:
+For this scenario, you'll want to set `use-git-deploy-key-wrapper` input variable to `true` and create your key with a comment that has the git SSH url in it. For example:
 ```
 ssh-keygen -t ed25519 -a 100 -C "ssh://git@github.com/ORGANIZATION/REPO.git" -m PEM -N "" -f ~/.ssh/REPO -q
 ```
