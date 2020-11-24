@@ -14,7 +14,7 @@ eval last=$last
 
 # Try to pick the right key
 # No "--word-regexp" because Terraforms usage of git ends up as
-# "git-upload-pack 'webfactory/ssh-agent.git'". "--word-regexp" will not match it.
+# "git-upload-pack '/webfactory/ssh-agent.git'". "--word-regexp" will not match it.
 # Other integrations still work without "--word-regexp"
 ssh-add -L | grep --max-count=1 $last > $key_file
 
