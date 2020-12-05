@@ -4,7 +4,7 @@ const fs = require('fs');
 
 try {
 
-    const home = process.env['HOME'];
+    const home = core.getInput('home-dir') ? core.getInput('home-dir') : process.env['HOME'];
     const homeSsh = home + '/.ssh';
 
     const privateKey = core.getInput('ssh-private-key');
