@@ -6,6 +6,8 @@ inputs:
         required: true
     ssh-auth-sock:
         description: 'Where to place the SSH Agent auth socket'
+    home-dir:
+        description: 'Explicit home directory'
 runs:
     using: 'node12'
     main: 'dist/index.js'
