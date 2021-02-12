@@ -124,7 +124,24 @@ As a note to my future self, in order to work on this repo:
 * Clone it
 * Run `yarn install` to fetch dependencies
 * _hack hack hack_
-* `node index.js`. Inputs are passed through `INPUT_` env vars with their names uppercased. Use `env "INPUT_SSH-PRIVATE-KEY=\`cat file\`" node index.js` for this action.
+* `node index.js`. Inputs are passed through `INPUT_` env vars with their names uppercased.
+
+  On *nix use:
+  ```bash
+  env "INPUT_SSH-PRIVATE-KEY=\`cat file\`" node index.js
+  ```
+
+  On Windows (cmd):
+  ```cmd
+  set /P INPUT_SSH-PRIVATE-KEY=< file
+  node index.js
+  ```
+
+  On Windows (PowerShell):
+  ```ps
+  ${env:INPUT_SSH-PRIVATE-KEY} = (Get-Content .\test-keys -Raw); node index.js
+  node index.js
+  ```
 * Run `npm run build` to update `dist/*`, which holds the files actually run
 * Read https://help.github.com/en/articles/creating-a-javascript-action if unsure.
 * Maybe update the README example when publishing a new version.
