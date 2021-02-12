@@ -1,18 +1,23 @@
 const core = require('@actions/core');
 const child_process = require('child_process');
 const fs = require('fs');
+const os = require('os');
 
 try {
 
-    const home = process.env['HOME'];
+    const home = os.homedir();
     const homeSsh = home + '/.ssh';
-
     const privateKey = core.getInput('ssh-private-key');
 
     if (!privateKey) {
         core.setFailed("The ssh-private-key argument is empty. Maybe the secret has not been configured, or you are using a wrong secret name in your workflow file.");
 
         return;
+    }
+
+    if (process.env['OS'] == 'Windows_NT') {
+        console.log('Preparing ssh-agent service on Windows');
+        child_process.execSync('sc config ssh-agent start=demand', { stdio: 'inherit' });
     }
 
     console.log(`Adding GitHub.com keys to ${homeSsh}/known_hosts`);
