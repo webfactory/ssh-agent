@@ -118,12 +118,9 @@ exports.issueCommand = issueCommand;
 const core = __webpack_require__(470);
 const child_process = __webpack_require__(129);
 const fs = __webpack_require__(747);
+const os = __webpack_require__(87);
 
 try {
-
-    const home = process.env['HOME'];
-    const homeSsh = home + '/.ssh';
-
     const privateKey = core.getInput('ssh-private-key');
 
     if (!privateKey) {
@@ -131,6 +128,21 @@ try {
 
         return;
     }
+
+    var home;
+
+    if (process.env['OS'] == 'Windows_NT') {
+        console.log('Preparing ssh-agent service on Windows');
+        child_process.execSync('sc config ssh-agent start=demand', { stdio: 'inherit' });
+
+        home = os.homedir();
+    } else {
+        // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
+        // Action runs, where $HOME is different from the pwent
+        var { homedir: home } = os.userInfo();
+    }
+
+    const homeSsh = home + '/.ssh';
 
     console.log(`Adding GitHub.com keys to ${homeSsh}/known_hosts`);
     fs.mkdirSync(homeSsh, { recursive: true });

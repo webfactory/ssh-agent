@@ -4,7 +4,7 @@ jobs:
     single_key_demo:
         strategy:
             matrix:
-                os: [ubuntu-latest, macOS-latest]
+                os: [ubuntu-latest, macOS-latest, windows-latest]
         runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v1
@@ -26,3 +26,17 @@ jobs:
               uses: ./
               with:
                   ssh-private-key: ${{ secrets.DEMO_KEY }}
+
+    docker_demo:
+        runs-on: ubuntu-latest        
+        container:
+            image: ubuntu:latest
+        steps:
+            - uses: actions/checkout@v1
+            - run: apt update && apt install -y openssh-client
+            - name: Setup key
+              uses: ./
+              with:
+                  ssh-private-key: |
+                    ${{ secrets.DEMO_KEY }}
+                    ${{ secrets.DEMO_KEY_2 }}
