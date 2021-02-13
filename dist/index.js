@@ -119,6 +119,7 @@ const core = __webpack_require__(470);
 const child_process = __webpack_require__(129);
 const fs = __webpack_require__(747);
 const os = __webpack_require__(87);
+const crypto = __webpack_require__(417);
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -175,6 +176,32 @@ try {
     console.log("Keys added:");
     child_process.execSync('ssh-add -l', { stdio: 'inherit' });
 
+    child_process.execFileSync('ssh-add', ['-L']).toString().split(/\r?\n/).forEach(function(key) {
+        let parts = key.match(/git@github.com:(.*)\.git/);
+
+        if (parts == null) {
+            return;
+        }
+
+        let userHost = parts[1];
+        let sha256 = crypto.createHash('sha256').update(key).digest('hex');
+
+        fs.writeFileSync(`${homeSsh}/${sha256}`, key + "\n", { mode: '600' });
+
+        child_process.execSync(`git config --global --replace-all url."git@${sha256}:${userHost}".insteadOf "https://github.com/${userHost}"`);
+        child_process.execSync(`git config --global --add url."git@${sha256}:${userHost}".insteadOf "git@github.com:${userHost}"`);
+
+        let sshConfig = `\nHost ${sha256}\n`
+                              + `    HostName github.com\n`
+                              + `    User git\n`
+                              + `    IdentityFile ${homeSsh}/${sha256}\n`
+                              + `    IdentitiesOnly yes\n`;
+
+        fs.appendFileSync(`${homeSsh}/config`, sshConfig);
+
+        console.log(`Added deploy-key mapping: Use key ${sha256} for GitHub repository ${userHost}`);
+    });
+
 } catch (error) {
     core.setFailed(error.message);
 }
@@ -186,6 +213,13 @@ try {
 /***/ (function(module) {
 
 module.exports = require("child_process");
+
+/***/ }),
+
+/***/ 417:
+/***/ (function(module) {
+
+module.exports = require("crypto");
 
 /***/ }),
 
