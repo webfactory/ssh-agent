@@ -6,7 +6,9 @@ This action
 * loads a private SSH key into the agent and
 * configures `known_hosts` for GitHub.com.
 
-It should work in all GitHub Actions virtual environments, including container-based workflows. Windows and Docker support is, however, somewhat new. Since we have little feedback from the field, things might not run so smooth for you as we'd hope. If Windows and/or Docker-based workflows work well for you, leave a :+1: at #17.
+It should work in all GitHub Actions virtual environments, including container-based workflows. 
+
+Windows and Docker support is, however, somewhat new. Since we have little feedback from the field, things might not run so smooth for you as we'd hope. If Windows and/or Docker-based workflows work well for you, leave a :+1: at https://github.com/webfactory/ssh-agent/pull/17.
 
 ## Why?
 
