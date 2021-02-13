@@ -33,6 +33,7 @@ jobs:
             image: ubuntu:latest
         steps:
             - uses: actions/checkout@v1
+            - run: apt update && apt install -y openssh-client
             - name: Setup key
               uses: ./
               with:
