@@ -6,6 +6,8 @@ This action
 * loads a private SSH key into the agent and
 * configures `known_hosts` for GitHub.com.
 
+It should work in all GitHub Actions virtual environments, including container-based workflows. Windows and Docker support is, however, somewhat new. Since we have little feedback from the field, things might not run so smooth for you as we'd hope. If Windows and/or Docker-based workflows work well for you, leave a :+1: at #17.
+
 ## Why?
 
 When running a GitHub Action workflow to stage your project, run tests or build images, you might need to fetch additional libraries or _vendors_ from private repositories.
@@ -67,10 +69,6 @@ The `$SSH_AUTH_SOCK` is used by several applications like git or rsync to connec
 The `$SSH_AGENT_PID` contains the process id of the agent. This is used to kill the agent in post job action.
 
 ## Known issues and limitations
-
-### Currently OS X and Linux only
-
-This action has not been tested for the Windows virtual environment. If you can provide the steps necessary to setup (even install?) OpenSSH on the Windows machine, please open an issue. 
 
 ### Works for the current job only
 
