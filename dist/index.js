@@ -190,6 +190,7 @@ try {
 
         child_process.execSync(`git config --global --replace-all url."git@${sha256}:${ownerAndRepo}".insteadOf "https://github.com/${ownerAndRepo}"`);
         child_process.execSync(`git config --global --add url."git@${sha256}:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
+        child_process.execSync(`git config --global --add url."git@${sha256}:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
 
         let sshConfig = `\nHost ${sha256}\n`
                               + `    HostName github.com\n`
