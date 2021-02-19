@@ -33,16 +33,16 @@ jobs:
         ...
         steps:
             - actions/checkout@v2
-            # Make sure the @v0.4.1 matches the current version of the
+            # Make sure the @v0.5.0 matches the current version of the
             # action 
-            - uses: webfactory/ssh-agent@v0.4.1
+            - uses: webfactory/ssh-agent@v0.5.0
               with:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
             - ... other steps
 ```
 5. If, for some reason, you need to change the location of the SSH agent socket, you can use the `ssh-auth-sock` input to provide a path.
 
-### Using multiple keys
+### Using Multiple Keys
 
 There are cases where you might need to use multiple keys. For example, "[deploy keys](https://docs.github.com/en/developers/overview/managing-deploy-keys#deploy-keys)" might be limited to a single repository, so you'll need several of them.
 
@@ -50,7 +50,7 @@ You can set up different keys as different secrets and pass them all to the acti
 
 ```yaml
 # ... contens as before
-            - uses: webfactory/ssh-agent@v0.4.1
+            - uses: webfactory/ssh-agent@v0.5.0
               with:
                   ssh-private-key: |
                         ${{ secrets.FIRST_KEY }}
@@ -78,13 +78,13 @@ The action exports the `SSH_AUTH_SOCK` and `SSH_AGENT_PID` environment variables
 The `$SSH_AUTH_SOCK` is used by several applications like git or rsync to connect to the SSH authentication agent.
 The `$SSH_AGENT_PID` contains the process id of the agent. This is used to kill the agent in post job action.
 
-## Known issues and limitations
+## Known Issues and Limitations
 
-### Works for the current job only
+### Works for the Current Job Only
 
 Since each job [runs in a fresh instance](https://help.github.com/en/articles/about-github-actions#job) of the virtual environment, the SSH key will only be available in the job where this action has been referenced. You can, of course, add the action in multiple jobs or even workflows. All instances can use the same `SSH_PRIVATE_KEY` secret.
 
-### SSH private key format
+### SSH Private Key Format
 
 If the private key is not in the `PEM` format, you will see an `Error loading key "(stdin)": invalid format` message.
 
@@ -94,21 +94,21 @@ Use `ssh-keygen -p -f path/to/your/key -m pem` to convert your key file to `PEM`
 
 The following items are not issues, but beyond what this Action is supposed to do.
 
-### Work on remote machines
+### Work on Remote Machines
 
 When using `ssh` to connect from the GitHub Action worker node to another machine, you *can* forward the SSH Agent socket and use your private key on the other (remote) machine. However, this Action will not configure `known_hosts` or other SSH settings on the remote machine for you.
 
-### Provide the SSH key as a file
+### Provide the SSH Key as a File
 
 This Action is designed to pass the SSH key directly into `ssh-agent`; that is, the key is available in memory on the GitHub Action worker node, but never written to disk. As a consequence, you _cannot_ pass the key as a build argument or a mounted file into Docker containers that you build or run on the worker node. You _can_, however, mount the `ssh-agent` Unix socket into a Docker container that you _run_, set up the `SSH_AUTH_SOCK` env var and then use SSH from within the container (see #11).
 
-### Run `ssh-keyscan` to add host keys for additional hosts
+### Run `ssh-keyscan` to Add Host Keys for Additional Hosts
 
 If you want to use `ssh-keyscan` to add additional hosts (that you own/know) to the `known_hosts` file, you can do so with a single shell line in your Action definition. You don't really need this Action to do this for you.
 
 As a side note, using `ssh-keyscan` without proper key verification is susceptible to man-in-the-middle attacks. You might prefer putting your _known_ SSH host key in your own Action files to add it to the `known_hosts` file. The SSH host key is not secret and can safely be committed into the repo. 
 
-## Creating SSH keys
+## Creating SSH Keys
 
 In order to create a new SSH key, run `ssh-keygen -t ed25519 -a 100 -f path/to/keyfile`, as suggested in [this blog post](https://stribika.github.io/2015/01/04/secure-secure-shell.html). 
 If you need to work with some older server software and need RSA keys, tr `ssh-keygen -t rsa -b 4096 -o -f path/to/keyfile` instead.
@@ -117,7 +117,7 @@ Both commands will prompt you for a key passphrase and save the key in `path/to/
 In general, having a passphrase is a good thing, since it will keep the key encrypted on your disk. When using the key with this action, however, you need to make sure you don't 
 specify a passphrase: The key must be usable without reading the passphrase from input. Since the key itself is stored using GitHub's "Secret" feature, it should be fairly safe anyway.
 
-## Authorizing a key
+## Authorizing a Key
 
 To actually grant the SSH key access, you can – on GitHub – use at least two ways:
 
