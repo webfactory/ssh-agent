@@ -3,12 +3,14 @@
 This action 
 * starts the `ssh-agent`, 
 * exports the `SSH_AUTH_SOCK` environment variable, 
-* loads a private SSH key into the agent and
+* loads one or several private SSH key into the agent and
 * configures `known_hosts` for GitHub.com.
 
 It should work in all GitHub Actions virtual environments, including container-based workflows. 
 
 Windows and Docker support is, however, somewhat new. Since we have little feedback from the field, things might not run so smooth for you as we'd hope. If Windows and/or Docker-based workflows work well for you, leave a :+1: at https://github.com/webfactory/ssh-agent/pull/17.
+
+Also, using multiple GitHub deployment keys is supported; keys are mapped to repositories by using SSH key comments (see below).
 
 ## Why?
 
@@ -22,7 +24,7 @@ GitHub Actions only have access to the repository they run for. So, in order to 
 2. Make sure you don't have a passphrase set on the private key.
 3. In your repository, go to the *Settings > Secrets* menu and create a new secret. In this example, we'll call it `SSH_PRIVATE_KEY`. Put the contents of the *private* SSH key file into the contents field. <br>
   This key should start with `-----BEGIN ... PRIVATE KEY-----`, consist of many lines and ends with `-----END ... PRIVATE KEY-----`. 
-4. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v1` line.
+4. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v2` line.
 
 ```yaml
 # .github/workflows/my-workflow.yml
@@ -30,7 +32,7 @@ jobs:
     my_job:
         ...
         steps:
-            - actions/checkout@v1
+            - actions/checkout@v2
             # Make sure the @v0.4.1 matches the current version of the
             # action 
             - uses: webfactory/ssh-agent@v0.4.1
@@ -58,12 +60,18 @@ You can set up different keys as different secrets and pass them all to the acti
 
 The `ssh-agent` will load all of the keys and try each one in order when establishing SSH connections.
 
-There's one **caveat**, though: SSH servers may abort the connection attempt after a number of mismatching keys have been presented. So if, for example, you have
-six different keys loaded into the `ssh-agent`, but the server aborts after five unknown keys, the last key (which might be the right one) will never even be tried. 
+There's one **caveat**, though: SSH servers may abort the connection attempt after a number of mismatching keys have been presented. So if, for example, you have six different keys loaded into the `ssh-agent`, but the server aborts after five unknown keys, the last key (which might be the right one) will never even be tried. But when you're using GitHub Deploy Keys, read on!
 
-Also, when using **Github deploy keys**, GitHub servers will accept the first known key. But since deploy keys are scoped to a single repository, you might get the error message `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.` if the wrong key/repository combination is tried.
+### Support for GitHub Deploy Keys
 
-In both cases, you might want to [try a wrapper script around `ssh`](https://gist.github.com/mpdude/e56fcae5bc541b95187fa764aafb5e6d) that can pick the right key, based on key comments. See [our blog post](https://www.webfactory.de/blog/using-multiple-ssh-deploy-keys-with-github) for the full story.
+When using **Github deploy keys**, GitHub servers will accept the _first_ known key. But since deploy keys are scoped to a single repository, this might not be the key needed to access a particular repository. Thus, you will get the error message `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.` if the wrong key/repository combination is tried.
+
+To support picking the right key in this use case, this action scans _key comments_ and will set up extra Git and SSH configuration to make things work.
+
+1. When creating the deploy key for a repository like `git@github.com:owner/repo.git` or `https://github.com/owner/repo`, put that URL into the key comment.
+2. After keys have been added to the agent, this action will scan the key comments. 
+3. For key comments containing such URLs, a Git config setting is written that uses [`url.<base>.insteadof`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf). It will redirect `git` requests to URLs starting with either `https://github.com/owner/repo` or `git@github.com:owner/repo` to a fake hostname/URL like `git@...some.hash...:owner/repo`.
+4. An SSH configuration section is generated that applies to the fake hostname. It will map the SSH connection back to `github.com`, while at the same time pointing SSH to a file containing the appropriate key's public part. That will make SSH use the right key when connecting to GitHub.com.
 
 ## Exported variables
 The action exports the `SSH_AUTH_SOCK` and `SSH_AGENT_PID` environment variables through the Github Actions core module.

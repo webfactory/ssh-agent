@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const child_process = require('child_process');
 const fs = require('fs');
 const os = require('os');
+const crypto = require('crypto');
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -57,6 +58,33 @@ try {
 
     console.log("Keys added:");
     child_process.execSync('ssh-add -l', { stdio: 'inherit' });
+
+    child_process.execFileSync('ssh-add', ['-L']).toString().split(/\r?\n/).forEach(function(key) {
+        let parts = key.match(/\bgithub.com[:/](.*)(?:\.git)?\b/);
+
+        if (parts == null) {
+            return;
+        }
+
+        let ownerAndRepo = parts[1];
+        let sha256 = crypto.createHash('sha256').update(key).digest('hex');
+
+        fs.writeFileSync(`${homeSsh}/${sha256}`, key + "\n", { mode: '600' });
+
+        child_process.execSync(`git config --global --replace-all url."git@${sha256}:${ownerAndRepo}".insteadOf "https://github.com/${ownerAndRepo}"`);
+        child_process.execSync(`git config --global --add url."git@${sha256}:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
+        child_process.execSync(`git config --global --add url."git@${sha256}:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
+
+        let sshConfig = `\nHost ${sha256}\n`
+                              + `    HostName github.com\n`
+                              + `    User git\n`
+                              + `    IdentityFile ${homeSsh}/${sha256}\n`
+                              + `    IdentitiesOnly yes\n`;
+
+        fs.appendFileSync(`${homeSsh}/config`, sshConfig);
+
+        console.log(`Added deploy-key mapping: Use key "${key}" for GitHub repository ${ownerAndRepo}`);
+    });
 
 } catch (error) {
     core.setFailed(error.message);
