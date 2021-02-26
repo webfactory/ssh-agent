@@ -42,7 +42,12 @@ jobs:
                     ${{ secrets.DEMO_KEY_2 }}
 
     deployment_keys_demo:
-        runs-on: ubuntu-latest
+        env:
+            GIT_SSH_COMMAND: ssh -v
+        strategy:
+            matrix:
+                os: [ubuntu-latest, macOS-latest, windows-latest]
+        runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v2
             - name: Setup key
@@ -52,6 +57,7 @@ jobs:
                     ${{ secrets.MPDUDE_TEST_1_DEPLOY_KEY }}
                     ${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}
             - run: |
+                ssh-add -l
                 git clone https://github.com/mpdude/test-1.git test-1-http
                 git clone git@github.com:mpdude/test-1.git test-1-git
                 git clone ssh://git@github.com/mpdude/test-1.git test-1-git-ssh
