@@ -78,8 +78,7 @@ try {
         let sshConfig = `\nHost ${sha256}\n`
                               + `    HostName github.com\n`
                               + `    User git\n`
-                              + `    IdentityFile ${homeSsh}/${sha256}\n`
-                              + `    IdentitiesOnly yes\n`;
+                              + `    IdentityFile ${homeSsh}/${sha256}\n`;
 
         fs.appendFileSync(`${homeSsh}/config`, sshConfig);
 
