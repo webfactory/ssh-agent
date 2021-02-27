@@ -60,5 +60,6 @@ jobs:
             - run: |
                 cat > ~/.ssh/5965bf89ab6e2900262e3f6802dfb4d65cb0de539d0fbb97d381e7130a4ba7e9 <<< "${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}"
                 ssh-keygen -p -f ~/.ssh/5965bf89ab6e2900262e3f6802dfb4d65cb0de539d0fbb97d381e7130a4ba7e9 -N secret-passphrase
+                echo "secret-passphrase" | ssh-add ~/.ssh/5965bf89ab6e2900262e3f6802dfb4d65cb0de539d0fbb97d381e7130a4ba7e9
                 git clone git@github.com:mpdude/test-2.git test-2-git
               shell: bash
