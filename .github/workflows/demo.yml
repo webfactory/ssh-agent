@@ -45,6 +45,7 @@ jobs:
         env:
             GIT_SSH_COMMAND: ssh -v
         strategy:
+            fail-fast: false
             matrix:
                 os: [ubuntu-latest, macOS-latest, windows-latest]
         runs-on: ${{ matrix.os }}
@@ -57,4 +58,6 @@ jobs:
                     ${{ secrets.MPDUDE_TEST_1_DEPLOY_KEY }}
                     ${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}
             - run: |
+                cat > ~/.ssh/5965bf89ab6e2900262e3f6802dfb4d65cb0de539d0fbb97d381e7130a4ba7e9 <<< "${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}"
                 git clone git@github.com:mpdude/test-2.git test-2-git
+              shell: bash
