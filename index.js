@@ -82,7 +82,7 @@ try {
 
         fs.appendFileSync(`${homeSsh}/config`, sshConfig);
 
-        console.log(`Added deploy-key mapping: Use key "${key}" for GitHub repository ${ownerAndRepo}`);
+        console.log(`Added deploy-key mapping: Use key "${key}" for GitHub repository ${ownerAndRepo}, key file "${sha256}"`);
     });
 
 } catch (error) {
