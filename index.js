@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const child_process = require('child_process');
 const fs = require('fs');
 const os = require('os');
-const crypto = require('crypto');
+const token = require('crypto').randomBytes(64).toString('hex');
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -51,40 +51,64 @@ try {
         }
     }
 
-    console.log("Adding private key to agent");
+    console.log("Adding private keys to agent");
+    var keyNumber = 0;
+
     privateKey.split(/(?=-----BEGIN)/).forEach(function(key) {
-        child_process.execSync('ssh-add -', { input: key.trim() + "\n" });
+        ++keyNumber;
+        let keyFile = `${homeSsh}/key_${keyNumber}`;
+
+        // Write private key (unencrypted!) to file
+        console.log(`Write file ${keyFile}`);
+        fs.writeFileSync(keyFile, key.replace("\r\n", "\n").trim() + "\n", { mode: '600' });
+
+        // Set private key passphrase
+        let output = '';
+        try {
+            console.log(`Set passphrase on ${keyFile}`);
+            output = child_process.execFileSync('ssh-keygen', ['-p', '-f', keyFile, '-N', token], { stdio: 'inherit' });
+        } catch (exception) {
+            fs.unlinkSync(keyFile);
+            
+            throw exception;
+        }
+
+        // Load key into agent
+        console.log('Load key');
+        //let sshAdd = child_process.execSync(`echo "${token}" | ssh-add "${keyFile}"`, { stdio: 'inherit' });
+        let sshAdd = child_process.execFileSync('ssh-add', [keyFile], { stdio: 'inherit' }); 
+        // input: token + "\n", stdio: ['pipe', 'inherit', 'inherit'] });
+        //sshAdd.stdin.write(token + "\n");
+        //sshAdd.stdin.end();
+
+        output.toString().split(/\r?\n/).forEach(function(key) {
+            let parts = key.match(/^Key has comment '.*\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+?)(?=\.git|\s|\')/);
+
+            if (parts == null) {
+                return;
+            }
+
+            let ownerAndRepo = parts[1];
+
+            child_process.execSync(`git config --global --replace-all url."git@key-${keyNumber}:${ownerAndRepo}".insteadOf "https://github.com/${ownerAndRepo}"`);
+            child_process.execSync(`git config --global --add url."git@key-${keyNumber}:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
+            child_process.execSync(`git config --global --add url."git@key-${keyNumber}:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
+
+            // Use IdentitiesOnly=no due to https://github.com/PowerShell/Win32-OpenSSH/issues/1550
+            let sshConfig = `\nHost key-${keyNumber}\n`
+                                  + `    HostName github.com\n`
+                                  + `    User git\n`
+                                  + `    IdentitiesOnly yes\n`
+                                  + `    IdentityFile ${keyFile}\n`;
+
+            fs.appendFileSync(`${homeSsh}/config`, sshConfig);
+
+            console.log(`Added deploy-key mapping: Use key #${keyNumber} for GitHub repository ${ownerAndRepo}`);
+        });
     });
 
     console.log("Keys added:");
     child_process.execSync('ssh-add -l', { stdio: 'inherit' });
-
-    child_process.execFileSync('ssh-add', ['-L']).toString().split(/\r?\n/).forEach(function(key) {
-        let parts = key.match(/\bgithub.com[:/](.*)(?:\.git)?\b/);
-
-        if (parts == null) {
-            return;
-        }
-
-        let ownerAndRepo = parts[1];
-        let sha256 = crypto.createHash('sha256').update(key).digest('hex');
-
-        fs.writeFileSync(`${homeSsh}/${sha256}`, key + "\n", { mode: '600' });
-
-        child_process.execSync(`git config --global --replace-all url."git@${sha256}:${ownerAndRepo}".insteadOf "https://github.com/${ownerAndRepo}"`);
-        child_process.execSync(`git config --global --add url."git@${sha256}:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
-        child_process.execSync(`git config --global --add url."git@${sha256}:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
-
-        let sshConfig = `\nHost ${sha256}\n`
-                              + `    HostName github.com\n`
-                              + `    User git\n`
-                              + `    IdentitiesOnly no\n`
-                              + `    IdentityFile ${homeSsh}/${sha256}\n`;
-
-        fs.appendFileSync(`${homeSsh}/config`, sshConfig);
-
-        console.log(`Added deploy-key mapping: Use key "${key}" for GitHub repository ${ownerAndRepo}, key file "${sha256}"`);
-    });
 
 } catch (error) {
     core.setFailed(error.message);
