@@ -81,7 +81,7 @@ try {
         var sshAdd;
         
         try {
-            let sshAdd = child_process.execSync(`ssh-add ${keyFile}`, { stdio: 'inherit', env: { 'SSH_ASKPASS': `${homeSsh}/askpass` } }); 
+            let sshAdd = child_process.execSync(`ssh-add ${keyFile}`, { env: { 'SSH_ASKPASS': `${homeSsh}/askpass` } }); 
         } catch (exception) { 
             console.log(sshAdd);
             console.log(exception);        
