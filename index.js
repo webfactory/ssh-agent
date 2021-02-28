@@ -78,7 +78,15 @@ try {
         // Load key into agent
         console.log('Load key');
         //let sshAdd = child_process.execSync(`echo "${token}" | ssh-add "${keyFile}"`, { stdio: 'inherit' });
+        try {
         let sshAdd = child_process.execSync(`ssh-add ${keyFile}`, { stdio: 'inherit', env: { 'SSH_ASKPASS': `${homeSsh}/askpass` } }); 
+        } catch (exception) { 
+            console.log(sshAdd);
+            console.log(exception);        
+            throw exception;
+        }
+        console.log(sshAdd);
+        
         // input: token + "\n", stdio: ['pipe', 'inherit', 'inherit'] });
         //sshAdd.stdin.write(token + "\n");
         //sshAdd.stdin.end();
