@@ -62,6 +62,8 @@ try {
         console.log(`Write file ${keyFile}`);
         fs.writeFileSync(keyFile, key.replace("\r\n", "\n").trim() + "\n", { mode: '600' });
 
+        fs.writeFileSync(`${homeSsh}/askpass`, `echo ${token}`, { mode: '700' });
+
         // Set private key passphrase
         let output = '';
         try {
@@ -76,7 +78,7 @@ try {
         // Load key into agent
         console.log('Load key');
         //let sshAdd = child_process.execSync(`echo "${token}" | ssh-add "${keyFile}"`, { stdio: 'inherit' });
-        let sshAdd = child_process.execFileSync('ssh-add', [keyFile], { stdio: 'inherit' }); 
+        let sshAdd = child_process.execFileSync('ssh-add', [keyFile], { stdio: 'inherit', env: { 'SSH_ASKPASS': `${homeSsh}/askpass` } }); 
         // input: token + "\n", stdio: ['pipe', 'inherit', 'inherit'] });
         //sshAdd.stdin.write(token + "\n");
         //sshAdd.stdin.end();
