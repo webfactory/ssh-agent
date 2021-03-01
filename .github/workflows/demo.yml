@@ -58,6 +58,7 @@ jobs:
                     ${{ secrets.MPDUDE_TEST_1_DEPLOY_KEY }}
                     ${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}
             - run: |
+                ssh-add -l
                 cat ~/.ssh/config
                 ls -alh ~/.ssh
                 git clone git@github.com:mpdude/test-2.git test-2-git
