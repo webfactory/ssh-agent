@@ -59,10 +59,10 @@ jobs:
                     ${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}
             - run: |
                 ssh-add -l
-                cat ~/.ssh/config
-                ls -alh ~/.ssh
                 git clone git@github.com:mpdude/test-2.git test-2-git
 
+#                cat ~/.ssh/config
+#                ls -alh ~/.ssh
 #                git clone https://github.com/mpdude/test-1.git test-1-http
 #                git clone git@github.com:mpdude/test-1.git test-1-git
 #                git clone ssh://git@github.com/mpdude/test-1.git test-1-git-ssh
@@ -76,4 +76,4 @@ jobs:
 #                echo "secret-passphrase" | ssh-add ~/.ssh/5965bf89ab6e2900262e3f6802dfb4d65cb0de539d0fbb97d381e7130a4ba7e9
 #                ssh-add -L
 #                git clone git@github.com:mpdude/test-2.git test-2-git
-              shell: bash
+#              shell: bash

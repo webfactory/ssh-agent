@@ -49,12 +49,9 @@ try {
         const matches = /^(SSH_AUTH_SOCK|SSH_AGENT_PID)=(.*); export \1/.exec(lines[lineNumber])
         if (matches && matches.length > 0) {
             core.exportVariable(matches[1], matches[2])
-            process.env[matches[1]] = matches[2]; // use variables for ssh-add below
         }
     }
 
-    console.log(process.env);
-    
     console.log("Adding private keys to agent");
     var keyNumber = 0;
 
