@@ -67,7 +67,7 @@ try {
         let output = '';
         try {
             console.log(`Set passphrase on ${keyFile}`);
-            output = child_process.execFileSync('ssh-keygen', ['-p', '-f', keyFile, '-N', token], { stdio: 'inherit' });
+            output = child_process.execFileSync('ssh-keygen', ['-p', '-f', keyFile, '-N', token]);
         } catch (exception) {
             fs.unlinkSync(keyFile);
             
