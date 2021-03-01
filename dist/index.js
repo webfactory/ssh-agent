@@ -193,14 +193,7 @@ try {
         // Load key into agent
         var sshAdd;
         
-        try {
-            let sshAdd = child_process.execSync(`ssh-add ${keyFile}`, { env: { 'DISPLAY': 'fake', 'SSH_PASS': token, 'SSH_ASKPASS': 'askpass' } }); 
-        } catch (exception) { 
-            console.log(sshAdd.toString());
-            console.log(exception);        
-            throw exception;
-        }
-        console.log(sshAdd);
+        child_process.execFileSync(`ssh-add ${keyFile}`, { env: { 'DISPLAY': 'fake', 'SSH_PASS': token, 'SSH_ASKPASS': process.cwd() + '/askpass.exe' }, stdio: 'inherit' }); 
         
         output.toString().split(/\r?\n/).forEach(function(key) {
             let parts = key.match(/^Key has comment '.*\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+?)(?=\.git|\s|\')/);
