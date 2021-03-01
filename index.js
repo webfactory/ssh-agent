@@ -99,6 +99,7 @@ try {
                                   + `    HostName github.com\n`
                                   + `    User git\n`
                                   + `    IdentitiesOnly no\n`
+                                  + `    AddKeysToAgent yes\n`
                                   + `    IdentityFile ${keyFile}\n`;
 
             fs.appendFileSync(`${homeSsh}/config`, sshConfig);
