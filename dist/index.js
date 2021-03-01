@@ -166,6 +166,7 @@ try {
         const matches = /^(SSH_AUTH_SOCK|SSH_AGENT_PID)=(.*); export \1/.exec(lines[lineNumber])
         if (matches && matches.length > 0) {
             core.exportVariable(matches[1], matches[2])
+            process.env[matches[1]] = matches[2]; // use variables for ssh-add below
         }
     }
 
@@ -195,7 +196,7 @@ try {
         if (isWindows) {
             child_process.execFileSync('ssh-add', [keyFile], { env: { ...process.env, ...{ 'DISPLAY': 'fake', 'SSH_PASS': token, 'SSH_ASKPASS': 'D:\\a\\ssh-agent\\ssh-agent\\askpass.exe' } } });
         } else {
-            child_process.execFileSync('ssh-add', [keyFile], { input: token });
+            child_process.execFileSync('ssh-add', [keyFile], { env: process.env, input: token });
         }
         
         output.toString().split(/\r?\n/).forEach(function(key) {
