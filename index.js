@@ -53,6 +53,8 @@ try {
         }
     }
 
+    console.log(process.env);
+    
     console.log("Adding private keys to agent");
     var keyNumber = 0;
 
