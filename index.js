@@ -2,8 +2,7 @@ const core = require('@actions/core');
 const child_process = require('child_process');
 const fs = require('fs');
 const os = require('os');
-//const token = require('crypto').randomBytes(64).toString('hex');
-const token = 'test';
+const token = require('crypto').randomBytes(64).toString('hex');
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -75,14 +74,7 @@ try {
         }
 
         // Load key into agent
-        let sshAdd = undefined;
-        
-        try {
-            sshAdd = child_process.execSync(`ssh-add ${keyFile}`, { env: { 'DISPLAY': 'fake', 'SSH_PASS': token, 'SSH_ASKPASS': process.cwd() + '/askpass.exe' }, stdio: 'inherit', input: '' });
-        } catch (exception) {
-            console.log(sshAdd, exception);
-            throw exception;
-        }
+        child_process.execFileSync('ssh-add', [keyFile], { env: { ...process.env, ...{ 'DISPLAY': 'fake', 'SSH_PASS': token, 'SSH_ASKPASS': 'D:\\a\\ssh-agent\\ssh-agent\\askpass.exe' } } });
         
         output.toString().split(/\r?\n/).forEach(function(key) {
             let parts = key.match(/^Key has comment '.*\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+?)(?=\.git|\s|\')/);
