@@ -119,7 +119,8 @@ const core = __webpack_require__(470);
 const child_process = __webpack_require__(129);
 const fs = __webpack_require__(747);
 const os = __webpack_require__(87);
-const token = __webpack_require__(417).randomBytes(64).toString('hex');
+//const token = require('crypto').randomBytes(64).toString('hex');
+const token = 'test';
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -240,13 +241,6 @@ try {
 /***/ (function(module) {
 
 module.exports = require("child_process");
-
-/***/ }),
-
-/***/ 417:
-/***/ (function(module) {
-
-module.exports = require("crypto");
 
 /***/ }),
 
