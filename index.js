@@ -3,6 +3,7 @@ const child_process = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const token = require('crypto').randomBytes(64).toString('hex');
+const isWindows = (process.env['OS'] == 'Windows_NT');
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -15,7 +16,7 @@ try {
 
     var home;
 
-    if (process.env['OS'] == 'Windows_NT') {
+    if (isWindows) {
         console.log('Preparing ssh-agent service on Windows');
         child_process.execSync('sc config ssh-agent start=demand', { stdio: 'inherit' });
 
@@ -74,7 +75,11 @@ try {
         }
 
         // Load key into agent
-        child_process.execFileSync('ssh-add', [keyFile], { env: { ...process.env, ...{ 'DISPLAY': 'fake', 'SSH_PASS': token, 'SSH_ASKPASS': 'D:\\a\\ssh-agent\\ssh-agent\\askpass.exe' } } });
+        if (isWindows) {
+            child_process.execFileSync('ssh-add', [keyFile], { env: { ...process.env, ...{ 'DISPLAY': 'fake', 'SSH_PASS': token, 'SSH_ASKPASS': 'D:\\a\\ssh-agent\\ssh-agent\\askpass.exe' } } });
+        } else {
+            child_process.execFileSync('ssh-add', [keyFile], { input: token });
+        }
         
         output.toString().split(/\r?\n/).forEach(function(key) {
             let parts = key.match(/^Key has comment '.*\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+?)(?=\.git|\s|\')/);
