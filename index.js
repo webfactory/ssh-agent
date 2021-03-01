@@ -62,8 +62,6 @@ try {
         console.log(`Write file ${keyFile}`);
         fs.writeFileSync(keyFile, key.replace("\r\n", "\n").trim() + "\n", { mode: '600' });
 
-        fs.writeFileSync(`${homeSsh}/askpass`, `echo ${token}`, { mode: '700' });
-
         // Set private key passphrase
         let output = '';
         try {
@@ -76,23 +74,17 @@ try {
         }
 
         // Load key into agent
-        console.log('Load key');
-        //let sshAdd = child_process.execSync(`echo "${token}" | ssh-add "${keyFile}"`, { stdio: 'inherit' });
         var sshAdd;
         
         try {
-            let sshAdd = child_process.execSync(`ssh-add ${keyFile}`, { env: { 'SSH_ASKPASS': `${homeSsh}/askpass` } }); 
+            let sshAdd = child_process.execSync(`ssh-add ${keyFile}`, { env: { 'DISPLAY': 'fake', 'SSH_PASS': token, 'SSH_ASKPASS': 'askpass' } }); 
         } catch (exception) { 
-            console.log(sshAdd);
+            console.log(sshAdd.toString());
             console.log(exception);        
             throw exception;
         }
         console.log(sshAdd);
         
-        // input: token + "\n", stdio: ['pipe', 'inherit', 'inherit'] });
-        //sshAdd.stdin.write(token + "\n");
-        //sshAdd.stdin.end();
-
         output.toString().split(/\r?\n/).forEach(function(key) {
             let parts = key.match(/^Key has comment '.*\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+?)(?=\.git|\s|\')/);
 
