@@ -221,11 +221,11 @@ try {
             // On Windows, IdentitiesOnly=yes will ignore keys from the agent, but send explicit keys first; so use "no" (https://github.com/PowerShell/Win32-OpenSSH/issues/1550)
             let identitiesOnly = isWindows ? 'no' : 'yes';
             
-            // Use IdentitiesOnly=no due to https://github.com/PowerShell/Win32-OpenSSH/issues/1550
             let sshConfig = `\nHost key-${keyNumber}\n`
                                   + `    HostName github.com\n`
                                   + `    User git\n`
                                   + `    IdentitiesOnly ${identitiesOnly}\n`
+                                  + `    AddKeysToAgent yes\n`
                                   + `    IdentityFile ${keyFile}\n`;
 
             fs.appendFileSync(`${homeSsh}/config`, sshConfig);
