@@ -20,6 +20,10 @@ try {
         console.log('Preparing ssh-agent service on Windows');
         child_process.execSync('sc config ssh-agent start=demand', { stdio: 'inherit' });
 
+        // Work around https://github.com/PowerShell/openssh-portable/pull/447 by creating a \dev\tty file
+        fs.mkdirSync('/dev');
+        fs.closeSync(fs.openSync('dev/tty', 'a'));
+
         home = os.homedir();
     } else {
         // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
@@ -99,7 +103,6 @@ try {
                                   + `    HostName github.com\n`
                                   + `    User git\n`
                                   + `    IdentitiesOnly no\n`
-                                  + `    AddKeysToAgent yes\n`
                                   + `    IdentityFile ${keyFile}\n`;
 
             fs.appendFileSync(`${homeSsh}/config`, sshConfig);
