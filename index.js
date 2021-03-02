@@ -21,10 +21,10 @@ try {
         child_process.execSync('sc config ssh-agent start=demand', { stdio: 'inherit' });
 
         // Work around https://github.com/PowerShell/openssh-portable/pull/447 by creating a \dev\tty file
-        fs.mkdirSync('c:\\dev');
+        /*fs.mkdirSync('c:\\dev');
         fs.closeSync(fs.openSync('c:\\dev\\tty', 'a'));
         fs.mkdirSync('d:\\dev');
-        fs.closeSync(fs.openSync('d:\\dev\\tty', 'a'));
+        fs.closeSync(fs.openSync('d:\\dev\\tty', 'a'));*/
 
         home = os.homedir();
     } else {
@@ -102,7 +102,7 @@ try {
 
             // On Linux and OS X, IdentitiesOnly=no will send all keys from agent before the explicit key, so use "yes".
             // On Windows, IdentitiesOnly=yes will ignore keys from the agent, but send explicit keys first; so use "no" (https://github.com/PowerShell/Win32-OpenSSH/issues/1550)
-            let identitiesOnly = 'yes'; // isWindows ? 'no' : 'yes';
+            let identitiesOnly = isWindows ? 'no' : 'yes';
             
             let sshConfig = `\nHost key-${keyNumber}\n`
                                   + `    HostName github.com\n`

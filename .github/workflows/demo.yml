@@ -1,46 +1,6 @@
 on: [push, pull_request]
 
 jobs:
-    single_key_demo:
-        strategy:
-            matrix:
-                os: [ubuntu-latest, macOS-latest, windows-latest]
-        runs-on: ${{ matrix.os }}
-        steps:
-            - uses: actions/checkout@v2
-            - name: Setup key
-              uses: ./
-              with:
-                  ssh-private-key: |
-                    ${{ secrets.DEMO_KEY }}
-                    ${{ secrets.DEMO_KEY_2 }}
-
-    multiple_keys_demo:
-        strategy:
-            matrix:
-                os: [ubuntu-latest, macOS-latest]
-        runs-on: ${{ matrix.os }}
-        steps:
-            - uses: actions/checkout@v2
-            - name: Setup key
-              uses: ./
-              with:
-                  ssh-private-key: ${{ secrets.DEMO_KEY }}
-
-    docker_demo:
-        runs-on: ubuntu-latest
-        container:
-            image: ubuntu:latest
-        steps:
-            - uses: actions/checkout@v2
-            - run: apt update && apt install -y openssh-client
-            - name: Setup key
-              uses: ./
-              with:
-                  ssh-private-key: |
-                    ${{ secrets.DEMO_KEY }}
-                    ${{ secrets.DEMO_KEY_2 }}
-
     deployment_keys_demo:
         env:
             GIT_SSH_COMMAND: ssh -v
