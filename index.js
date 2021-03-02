@@ -102,12 +102,12 @@ try {
 
             // On Linux and OS X, IdentitiesOnly=no will send all keys from agent before the explicit key, so use "yes".
             // On Windows, IdentitiesOnly=yes will ignore keys from the agent, but send explicit keys first; so use "no" (https://github.com/PowerShell/Win32-OpenSSH/issues/1550)
-            let identitiesOnly = isWindows ? 'no' : 'yes';
+            //let identitiesOnly = isWindows ? 'no' : 'yes';
             
             let sshConfig = `\nHost key-${keyNumber}\n`
                                   + `    HostName github.com\n`
                                   + `    User git\n`
-                                  + `    IdentitiesOnly ${identitiesOnly}\n`
+                                  + `    IdentitiesOnly yes\n`
                                   + `    AddKeysToAgent yes\n`
                                   + `    IdentityFile ${keyFile}\n`;
 
