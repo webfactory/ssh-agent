@@ -140,6 +140,8 @@ try {
         // Work around https://github.com/PowerShell/openssh-portable/pull/447 by creating a \dev\tty file
         fs.mkdirSync('c:\\dev');
         fs.closeSync(fs.openSync('c:\\dev\\tty', 'a'));
+        fs.mkdirSync('d:\\dev');
+        fs.closeSync(fs.openSync('d:\\dev\\tty', 'a'));
 
         home = os.homedir();
     } else {
