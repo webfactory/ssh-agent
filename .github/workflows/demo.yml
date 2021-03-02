@@ -17,13 +17,12 @@ jobs:
                   ssh-private-key: |
                     ${{ secrets.MPDUDE_TEST_1_DEPLOY_KEY }}
                     ${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}
-            - run: |
-                cat ~/.ssh/config                
-                ssh-add -l
-                C:/Windows/System32/OpenSSH/ssh.exe -v git@key-2 'echo octocat'
+#            - run: |
+#                cat ~/.ssh/config                
+#                ssh-add -l
+#                C:/Windows/System32/OpenSSH/ssh.exe -v git@key-2 'echo octocat'
             - name: Setup tmate session
               uses: mxschmitt/action-tmate@v3
-              if: ${{ failure() }}
               
 #                git clone git@github.com:mpdude/test-2.git test-2-git
 #                ls -alh ~/.ssh
