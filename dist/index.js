@@ -138,8 +138,8 @@ try {
         child_process.execSync('sc config ssh-agent start=demand', { stdio: 'inherit' });
 
         // Work around https://github.com/PowerShell/openssh-portable/pull/447 by creating a \dev\tty file
-        fs.mkdirSync('\\dev');
-        fs.closeSync(fs.openSync('\\dev\\tty', 'a'));
+        fs.mkdirSync('c:\\dev');
+        fs.closeSync(fs.openSync('c:\\dev\\tty', 'a'));
 
         home = os.homedir();
     } else {
@@ -215,11 +215,15 @@ try {
             child_process.execSync(`git config --global --add url."git@key-${keyNumber}:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
             child_process.execSync(`git config --global --add url."git@key-${keyNumber}:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
 
+            // On Linux and OS X, IdentitiesOnly=no will send all keys from agent before the explicit key, so use "yes".
+            // On Windows, IdentitiesOnly=yes will ignore keys from the agent, but send explicit keys first; so use "no" (https://github.com/PowerShell/Win32-OpenSSH/issues/1550)
+            let identitiesOnly = isWindows ? 'no' : 'yes';
+            
             // Use IdentitiesOnly=no due to https://github.com/PowerShell/Win32-OpenSSH/issues/1550
             let sshConfig = `\nHost key-${keyNumber}\n`
                                   + `    HostName github.com\n`
                                   + `    User git\n`
-                                  + `    IdentitiesOnly no\n`
+                                  + `    IdentitiesOnly ${identitiesOnly}\n`
                                   + `    IdentityFile ${keyFile}\n`;
 
             fs.appendFileSync(`${homeSsh}/config`, sshConfig);
