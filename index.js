@@ -21,8 +21,8 @@ try {
         child_process.execSync('sc config ssh-agent start=demand', { stdio: 'inherit' });
 
         // Work around https://github.com/PowerShell/openssh-portable/pull/447 by creating a \dev\tty file
-        fs.mkdirSync('/dev');
-        fs.closeSync(fs.openSync('dev/tty', 'a'));
+        fs.mkdirSync('\\dev');
+        fs.closeSync(fs.openSync('\\dev\\tty', 'a'));
 
         home = os.homedir();
     } else {
