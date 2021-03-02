@@ -59,6 +59,7 @@ jobs:
                     ${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}
             - run: |
                 printenv
+                pwd
                 git clone git@github.com:mpdude/test-2.git test-2-git
 
 #                cat ~/.ssh/config
