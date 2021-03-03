@@ -11,12 +11,12 @@ jobs:
         runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v2
-            - name: Setup key
-              uses: ./
-              with:
-                  ssh-private-key: |
-                    ${{ secrets.MPDUDE_TEST_1_DEPLOY_KEY }}
-                    ${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}
+#            - name: Setup key
+#              uses: ./
+#              with:
+#                  ssh-private-key: |
+#                    ${{ secrets.MPDUDE_TEST_1_DEPLOY_KEY }}
+#                    ${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}
 #            - run: |
 #                cat ~/.ssh/config                
 #                ssh-add -l
