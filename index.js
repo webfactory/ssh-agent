@@ -1,8 +1,8 @@
 const core = require('@actions/core');
 const child_process = require('child_process');
 const fs = require('fs');
-const os = require('os');
 const crypto = require('crypto');
+const { home, sshAgent, sshAdd } = require('./paths.js');
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -12,22 +12,6 @@ try {
 
         return;
     }
-
-    const { home, sshAgent, sshAdd } = (process.env['OS'] != 'Windows_NT') ? {
-
-              // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
-              // Action runs, where $HOME is different from the pwent
-              home: os.userInfo().homedir,
-              sshAgent: 'ssh-agent',
-              sshAdd: 'ssh-add'
-
-          } : {
-
-              home: os.homedir(),
-              sshAgent: 'c://progra~1//git//usr//bin//ssh-agent.exe',
-              sshAdd: 'c://progra~1//git//usr//bin//ssh-add.exe'
-
-          };
 
     const homeSsh = home + '/.ssh';
 

@@ -122,13 +122,15 @@ module.exports = require("child_process");
 /***/ 175:
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
-const core = __webpack_require__(470)
-const { execSync } = __webpack_require__(129)
+const core = __webpack_require__(470);
+const { execSync } = __webpack_require__(129);
+const { sshAgent } = __webpack_require__(972);
 
 try {
     // Kill the started SSH agent
-    console.log('Stopping SSH agent')
-    execSync('kill ${SSH_AGENT_PID}', { stdio: 'inherit' })
+    console.log('Stopping SSH agent');
+    execSync(sshAgent, ['-k'], { stdio: 'inherit' });
+
 } catch (error) {
     console.log(error.message);
     console.log('Error stopping the SSH agent, proceeding anyway');
@@ -479,6 +481,31 @@ module.exports = require("path");
 /***/ (function(module) {
 
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 972:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const os = __webpack_require__(87);
+
+module.exports = (process.env['OS'] != 'Windows_NT') ? {
+
+    // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
+    // Action runs, where $HOME is different from the pwent
+    home: os.userInfo().homedir,
+    sshAgent: 'ssh-agent',
+    sshAdd: 'ssh-add'
+
+} : {
+
+    home: os.homedir(),
+    sshAgent: 'c://progra~1//git//usr//bin//ssh-agent.exe',
+    sshAdd: 'c://progra~1//git//usr//bin//ssh-add.exe'
+
+};
+
+
 
 /***/ })
 

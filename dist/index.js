@@ -118,8 +118,8 @@ exports.issueCommand = issueCommand;
 const core = __webpack_require__(470);
 const child_process = __webpack_require__(129);
 const fs = __webpack_require__(747);
-const os = __webpack_require__(87);
 const crypto = __webpack_require__(417);
+const { home, sshAgent, sshAdd } = __webpack_require__(972);
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -129,22 +129,6 @@ try {
 
         return;
     }
-
-    const { home, sshAgent, sshAdd } = (process.env['OS'] != 'Windows_NT') ? {
-
-              // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
-              // Action runs, where $HOME is different from the pwent
-              home: os.userInfo().homedir,
-              sshAgent: 'ssh-agent',
-              sshAdd: 'ssh-add'
-
-          } : {
-
-              home: os.homedir(),
-              sshAgent: 'c://progra~1//git//usr//bin//ssh-agent.exe',
-              sshAdd: 'c://progra~1//git//usr//bin//ssh-add.exe'
-
-          };
 
     const homeSsh = home + '/.ssh';
 
@@ -571,6 +555,31 @@ module.exports = require("path");
 /***/ (function(module) {
 
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 972:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const os = __webpack_require__(87);
+
+module.exports = (process.env['OS'] != 'Windows_NT') ? {
+
+    // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
+    // Action runs, where $HOME is different from the pwent
+    home: os.userInfo().homedir,
+    sshAgent: 'ssh-agent',
+    sshAdd: 'ssh-add'
+
+} : {
+
+    home: os.homedir(),
+    sshAgent: 'c://progra~1//git//usr//bin//ssh-agent.exe',
+    sshAdd: 'c://progra~1//git//usr//bin//ssh-add.exe'
+
+};
+
+
 
 /***/ })
 
