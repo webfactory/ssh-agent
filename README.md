@@ -90,6 +90,10 @@ If the private key is not in the `PEM` format, you will see an `Error loading ke
 
 Use `ssh-keygen -p -f path/to/your/key -m pem` to convert your key file to `PEM`, but be sure to make a backup of the file first 😉.
 
+### Prerequisite for Container based Workflows
+
+If using this on a container based workflow, make sure that your container has ssh-clients package installed. 
+
 ## Additional Information for Particular Tools or Platforms
 
 If you know that your favorite tool or platform of choice requires extra tweaks or has some caveats when running with SSH, feel free to open a PR to amend this section here.
