@@ -100,7 +100,9 @@ stuff = { git = "ssh://git@github.com/myorg/stuff.git", branch = "main" }
 
 You will need to change a configuration in the workflow for Windows machines in order to make cargo able to clone private repositories.
 
-Add this step once in your workflow **before** any cargo command:
+There are 2 ways you can achieve this:
+
+1. Add this step once in your job **before** any cargo command:
 
 ```
       - name: Update cargo config to use Git CLI
@@ -108,6 +110,13 @@ Add this step once in your workflow **before** any cargo command:
 ```
 
 This will configure Cargo to use the Git CLI as explained in the [Cargo's documentation](https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli).
+
+2. Alternatively you can set it to the environment variables for the entire workflow:
+
+```
+env:
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
+```
 
 ## What this Action *cannot* do for you
 
