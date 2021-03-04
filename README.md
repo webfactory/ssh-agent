@@ -94,6 +94,10 @@ Use `ssh-keygen -p -f path/to/your/key -m pem` to convert your key file to `PEM`
 
 If you know that your favorite tool or platform of choice requires extra tweaks or has some caveats when running with SSH, feel free to open a PR to amend this section here.
 
+### Container-based Workflows
+
+If you are using this action on container-based workflows, make sure the container has the necessary SSH binaries or package(s) installed.
+
 ### Cargo's (Rust) Private Dependencies on Windows
 
 If you are using private repositories in your dependencies like this:
