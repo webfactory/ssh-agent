@@ -90,6 +90,25 @@ If the private key is not in the `PEM` format, you will see an `Error loading ke
 
 Use `ssh-keygen -p -f path/to/your/key -m pem` to convert your key file to `PEM`, but be sure to make a backup of the file first 😉.
 
+### Cargo's (Rust) Private Dependencies
+
+If you are using private repositories in your dependencies like this:
+
+```
+stuff = { git = "ssh://git@github.com/myorg/stuff.git", branch = "main" }
+```
+
+You will need to change a configuration in the workflow in order to make cargo able to clone private repositories.
+
+Add this step once in your workflow **before** any cargo command:
+
+```
+      - name: Update cargo config to use Git CLI
+        run: Set-Content -Path $env:USERPROFILE\.cargo\config.toml "[net]`ngit-fetch-with-cli = true"
+```
+
+This will configure Cargo to use the Git CLI as explained in the [Cargo's documentation](https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli).
+
 ## What this Action *cannot* do for you
 
 The following items are not issues, but beyond what this Action is supposed to do.
