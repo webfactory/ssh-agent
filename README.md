@@ -90,6 +90,10 @@ If the private key is not in the `PEM` format, you will see an `Error loading ke
 
 Use `ssh-keygen -p -f path/to/your/key -m pem` to convert your key file to `PEM`, but be sure to make a backup of the file first 😉.
 
+## Additional Information for Particular Tools or Platforms
+
+If you know that your favorite tool or platform of choice requires extra tweaks or has some caveats when running with SSH, feel free to open a PR to amend this section here.
+
 ### Cargo's (Rust) Private Dependencies on Windows
 
 If you are using private repositories in your dependencies like this:
@@ -98,7 +102,7 @@ If you are using private repositories in your dependencies like this:
 stuff = { git = "ssh://git@github.com/myorg/stuff.git", branch = "main" }
 ```
 
-You will need to change a configuration in the workflow for Windows machines in order to make cargo able to clone private repositories.
+... you will need to change a configuration in the workflow for Windows machines in order to make cargo able to clone private repositories.
 
 There are 2 ways you can achieve this:
 
