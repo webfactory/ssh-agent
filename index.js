@@ -87,5 +87,11 @@ try {
     });
 
 } catch (error) {
+
+    if (error.code == 'ENOENT') {
+        console.log(`The '${error.path}' executable could not be found. Please make sure it is on your PATH and/or the necessary packages are installed.`);
+        console.log(`PATH is set to: ${process.env.PATH}`);
+    }
+
     core.setFailed(error.message);
 }
