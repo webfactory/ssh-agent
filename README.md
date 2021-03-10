@@ -33,9 +33,9 @@ jobs:
         ...
         steps:
             - actions/checkout@v2
-            # Make sure the @v0.5.0 matches the current version of the
+            # Make sure the @v0.5.1 matches the current version of the
             # action 
-            - uses: webfactory/ssh-agent@v0.5.0
+            - uses: webfactory/ssh-agent@v0.5.1
               with:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
             - ... other steps
@@ -50,7 +50,7 @@ You can set up different keys as different secrets and pass them all to the acti
 
 ```yaml
 # ... contens as before
-            - uses: webfactory/ssh-agent@v0.5.0
+            - uses: webfactory/ssh-agent@v0.5.1
               with:
                   ssh-private-key: |
                         ${{ secrets.FIRST_KEY }}
