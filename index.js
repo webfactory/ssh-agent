@@ -53,6 +53,7 @@ try {
         const parts = key.match(/\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/);
 
         if (!parts) {
+            console.log(`WARN: key '{key}' does not match the appropriate format; skipping git configuration`); 
             return;
         }
 
