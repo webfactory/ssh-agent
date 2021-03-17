@@ -50,16 +50,17 @@ try {
     console.log('Configuring deployment key(s)');
 
     child_process.execFileSync(sshAdd, ['-L']).toString().split(/\r?\n/).forEach(function(key) {
-        const parts = key.match(/\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/);
+        var lowerCaseKey = key.ToLowerCase();
+        const parts = lowerCaseKey.match(/\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/);
 
         if (!parts) {
             return;
         }
 
-        const sha256 = crypto.createHash('sha256').update(key).digest('hex');
+        const sha256 = crypto.createHash('sha256').update(lowerCaseKey).digest('hex');
         const ownerAndRepo = parts[1].replace(/\.git$/, '');
 
-        fs.writeFileSync(`${homeSsh}/key-${sha256}`, key + "\n", { mode: '600' });
+        fs.writeFileSync(`${homeSsh}/key-${sha256}`, lowerCaseKey + "\n", { mode: '600' });
 
         child_process.execSync(`git config --global --replace-all url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "https://github.com/${ownerAndRepo}"`);
         child_process.execSync(`git config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
