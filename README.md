@@ -68,60 +68,10 @@ When using **Github deploy keys**, GitHub servers will accept the _first_ known 
 
 To support picking the right key in this use case, this action scans _key comments_ and will set up extra Git and SSH configuration to make things work.
 
-1. When creating the deploy key for a repository like `git@github.com:owner/repo.git` or `https://github.com/owner/repo`, put that URL into the key comment. You can do so using this command: `ssh-keygen -b 4096 -t rsa -N "" -f key -C "git@github.com:my-org/my-swift-package-repo.git"`
+1. When creating the deploy key for a repository like `git@github.com:owner/repo.git` or `https://github.com/owner/repo`, put that URL into the key comment. You can do so using this command: `ssh-keygen -b 4096 -t rsa -N "" -f key -C "git@github.com:my-org/my-repo.git"`
 2. After keys have been added to the agent, this action will scan the key comments. 
 3. For key comments containing such URLs, a Git config setting is written that uses [`url.<base>.insteadof`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf). It will redirect `git` requests to URLs starting with either `https://github.com/owner/repo` or `git@github.com:owner/repo` to a fake hostname/URL like `git@...some.hash...:owner/repo`.
 4. An SSH configuration section is generated that applies to the fake hostname. It will map the SSH connection back to `github.com`, while at the same time pointing SSH to a file containing the appropriate key's public part. That will make SSH use the right key when connecting to GitHub.com.
-
-### Support for Swift Packages (using Deploy Key + Secret)
-
-If you are using a privately hosted Swift Package dependency in your project, there are a few additional steps to take in order for SPM to properly authenticate with your private swift package repo:
-
-**In the private Swift Package Repo follow these steps:**
-
-* Create a `.ssh` directory in the root: `mkdir .ssh`
-* Change to the `.ssh` directory: `cd .ssh`
-* Generate an SSH key pair using the repo's ssh url as a comment:  `ssh-keygen -b 4096 -t rsa -N "" -f key -C "git@github.com:my-org/my-swift-package-repo.git"`
-* Create a `.config` file and add the following:
-
-```
-Host github.com
-    HostName github.com
-    User git
-    IdentityFile ./.ssh/key
-    UseKeychain yes     # for macOS keychain
-    AddKeysToAgent yes  # for macOS keychain
-    PreferredAuthentications publickey
-```
-
-* Go to your repo's **Deploy Keys** page: `https://github.com/my-org/my-swift-package-repo/settings/keys`
-* Create a **Deploy Key** using the contents of the previously generated **public** ssh key: : `.ssh/key.pub` *(Example key name: SSH\_PUBLIC\_KEY)*
-
-**In the repo that depends on the private Swift Package follow these steps:**
-
-* Go to your repo's **Secrets** page: `https://github.com/my-org/my-swift-package-repo/settings/secrets/actions`
-* Create a **Secret** using the contents of the **private** key you generated above: `private-swift-package/.ssh/key` *(Example key name: SPM\_SSH\_PRIVATE\_KEY)*
-* Update your GitHub Actions `.yml` file to look like the following:
-
-```
-- name: Checkout Project
-  uses: actions/checkout@v2
-  
-- name: Set SSH Key for remote host
-  uses: webfactory/ssh-agent@v0.5.2
-  with:
-	ssh-private-key: ${{ secrets.SPM_SSH_PRIVATE_KEY }}
-      
-- name: Update known hosts
-  run: |
-	ssh-keyscan github.com >> ~/.ssh/known_hosts
-
-- name: Build Xcode App
-  run: |
-	xcodebuild build -workspace MyCoolApp.xcworkspace -scheme MyCoolAppExample -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 12 Pro,OS=14.4' -scmProvider system
-```
-
-* The important part to note is the use of `-scmProvider system` as it specifies SPM to use the current system's git configuration and **NOT** Xcode's.
 
 ## Exported variables
 The action exports the `SSH_AUTH_SOCK` and `SSH_AGENT_PID` environment variables through the Github Actions core module.
@@ -174,6 +124,42 @@ This will configure Cargo to use the Git CLI as explained in the [Cargo's docume
 ```
 env:
   CARGO_NET_GIT_FETCH_WITH_CLI: true
+```
+
+### Support for Swift Packages hosted in private repository
+
+If you are using a privately hosted Swift Package dependency in your project, there are a few additional steps to take in order for SPM to properly authenticate with your private swift package repo:
+
+**In the private Swift Package Repo follow these steps:**
+
+* Create a `.ssh` directory in the root: `mkdir .ssh`
+* Change to the `.ssh` directory: `cd .ssh`
+* Generate an SSH key pair using the repo's ssh url as a comment:  `ssh-keygen -b 4096 -t rsa -N "" -f key -C "git@github.com:my-org/my-swift-package-repo.git"`
+* Create a `.config` file and add the following:
+
+```
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ./.ssh/key
+    UseKeychain yes     # for macOS keychain
+    AddKeysToAgent yes  # for macOS keychain
+    PreferredAuthentications publickey
+```
+
+* Go to your repo's **Deploy Keys** page: `https://github.com/my-org/my-swift-package-repo/settings/keys`
+* Create a **Deploy Key** using the contents of the previously generated **public** ssh key: : `.ssh/key.pub` *(Example key name: SSH\_PUBLIC\_KEY)*
+
+**In the repo that depends on the private Swift Package follow these steps:**
+
+* Go to your repo's **Secrets** page: `https://github.com/my-org/my-swift-package-repo/settings/secrets/actions`
+* Create a **Secret** using the contents of the **private** key you generated above: `private-swift-package/.ssh/key` *(Example key name: SPM\_SSH\_PRIVATE\_KEY)*
+* Update your `xcodebuild` command to include `scmProvider system` as that specifies SPM to use the current system's git configuration and **NOT** Xcode's.:
+
+```
+- name: Build Xcode App
+  run: |
+    xcodebuild build -workspace MyCoolApp.xcworkspace -scheme MyCoolAppExample -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 12 Pro,OS=14.4' -scmProvider system
 ```
 
 ## What this Action *cannot* do for you
