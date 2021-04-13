@@ -147,6 +147,7 @@ Host github.com
     PreferredAuthentications publickey
 ```
 
+* Commit these changes.
 * Go to your repo's **Deploy Keys** page: `https://github.com/my-org/my-swift-package-repo/settings/keys`
 * Create a **Deploy Key** using the contents of the previously generated **public** ssh key: : `.ssh/key.pub` *(Example key name: SSH\_PUBLIC\_KEY)*
 
@@ -154,7 +155,7 @@ Host github.com
 
 * Go to your repo's **Secrets** page: `https://github.com/my-org/my-swift-package-repo/settings/secrets/actions`
 * Create a **Secret** using the contents of the **private** key you generated above: `private-swift-package/.ssh/key` *(Example key name: SPM\_SSH\_PRIVATE\_KEY)*
-* Update your `xcodebuild` command to include `scmProvider system` as that specifies SPM to use the current system's git configuration and **NOT** Xcode's.:
+* Update your `xcodebuild` command to include `-scmProvider system` as that specifies SPM to use the current system's git configuration and **NOT** Xcode's.:
 
 ```
 - name: Build Xcode App
