@@ -68,7 +68,7 @@ When using **Github deploy keys**, GitHub servers will accept the _first_ known 
 
 To support picking the right key in this use case, this action scans _key comments_ and will set up extra Git and SSH configuration to make things work.
 
-1. When creating the deploy key for a repository like `git@github.com:owner/repo.git` or `https://github.com/owner/repo`, put that URL into the key comment.
+1. When creating the deploy key for a repository like `git@github.com:owner/repo.git` or `https://github.com/owner/repo`, put that URL into the key comment. (Hint: Try `ssh-keygen ... -C "git@github.com:owner/repo.git"`.)
 2. After keys have been added to the agent, this action will scan the key comments. 
 3. For key comments containing such URLs, a Git config setting is written that uses [`url.<base>.insteadof`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf). It will redirect `git` requests to URLs starting with either `https://github.com/owner/repo` or `git@github.com:owner/repo` to a fake hostname/URL like `git@...some.hash...:owner/repo`.
 4. An SSH configuration section is generated that applies to the fake hostname. It will map the SSH connection back to `github.com`, while at the same time pointing SSH to a file containing the appropriate key's public part. That will make SSH use the right key when connecting to GitHub.com.
