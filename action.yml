@@ -10,6 +10,7 @@ runs:
     using: 'node12'
     main: 'dist/index.js'
     post: 'dist/cleanup.js'
+    post-if: 'always()'
 branding:
     icon: loader
     color: 'yellow'
