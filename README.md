@@ -128,7 +128,7 @@ env:
 
 ### Using Deploy Keys with Swift Package Manager
 
-`xcodebuild` by default uses Xcode's built-it Git tooling. If you want to use GitHub Deploy Keys as supported by this action, however, that version of Git will lack the necessary URL remapping. In this case, pass `-scmProvider system` to the `xcodebuild` command, as mentioned in [Apple's documentation](https://developer.apple.com/documentation/swift_packages/building_swift_packages_or_apps_that_use_them_in_continuous_integration_workflows#3680255).
+`xcodebuild` by default uses Xcode's built-in Git tooling. If you want to use GitHub Deploy Keys as supported by this action, however, that version of Git will lack the necessary URL remapping. In this case, pass `-scmProvider system` to the `xcodebuild` command, as mentioned in [Apple's documentation](https://developer.apple.com/documentation/swift_packages/building_swift_packages_or_apps_that_use_them_in_continuous_integration_workflows#3680255).
 
 ## What this Action *cannot* do for you
 
