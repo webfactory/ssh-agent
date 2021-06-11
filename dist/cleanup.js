@@ -123,14 +123,13 @@ module.exports = require("child_process");
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
 const core = __webpack_require__(470);
-const { execSync } = __webpack_require__(129);
+const { execFileSync } = __webpack_require__(129);
 const { sshAgent } = __webpack_require__(972);
 
 try {
     // Kill the started SSH agent
     console.log('Stopping SSH agent');
-    execSync(sshAgent, ['-k'], { stdio: 'inherit' });
-
+    execFileSync(sshAgent, ['-k'], { stdio: 'inherit' });
 } catch (error) {
     console.log(error.message);
     console.log('Error stopping the SSH agent, proceeding anyway');
