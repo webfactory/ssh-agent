@@ -166,11 +166,17 @@ try {
 
     console.log('Configuring deployment key(s)');
 
-    child_process.execFileSync(sshAdd, ['-L']).toString().split(/\r?\n/).forEach(function(key) {
+    child_process.execFileSync(sshAdd, ['-L']).toString().split(/\r?\n/).forEach(function(key, index) {
+        if (!key) {
+            console.log(`Ignoring empty key at position ${index}.`);
+
+            return;
+        }
+
         const parts = key.match(/\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/i);
 
         if (!parts) {
-            console.log(`Comment for key '${key}' does not match GitHub URL pattern. Not treating it as a GitHub deploy key.`);
+            console.log(`Comment for key at position ${index} does not match GitHub URL pattern. Not treating it as a GitHub deploy key.`);
 
             return;
         }
