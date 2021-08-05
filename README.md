@@ -98,6 +98,19 @@ If you know that your favorite tool or platform of choice requires extra tweaks 
 
 If you are using this action on container-based workflows, make sure the container has the necessary SSH binaries or package(s) installed.
 
+#### build-push-action
+
+If you are using the `docker/build-push-action`, and would like to pass the SSH key, you can do so by adding the following config to pass the socket file through:
+
+```
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          ssh: |
+            default=${{ env.SSH_AUTH_SOCK }}
+```
+
 ### Cargo's (Rust) Private Dependencies on Windows
 
 If you are using private repositories in your dependencies like this:
