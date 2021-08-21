@@ -26,24 +26,24 @@ GitHub Actions only have access to the repository they run for. So, in order to 
   This key should start with `-----BEGIN ... PRIVATE KEY-----`, consist of many lines and ends with `-----END ... PRIVATE KEY-----`. 
 4. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v2` line.
 
-    ```yaml
-    # .github/workflows/my-workflow.yml
-    jobs:
-        my_job:
-            ...
-            steps:
-                # This action has to precede ssh-agent, since it undoes its effects
-                - uses: actions/checkout@v2
-                
-                # Make sure the @v0.5.3 matches the current version of the
-                # action 
-                - uses: webfactory/ssh-agent@v0.5.3
-                  with:
-                      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+   ```yaml
+   # .github/workflows/my-workflow.yml
+   jobs:
+       my_job:
+           ...
+           steps:
+               # This action has to precede ssh-agent, since it undoes its effects
+               - uses: actions/checkout@v2
+               
+               # Make sure the @v0.5.3 matches the current version of the
+               # action 
+               - uses: webfactory/ssh-agent@v0.5.3
+                 with:
+                     ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
     
-                # Here the ssh keys are available for use
-                - ... other steps where the repositories are cloned and/or or a submodule update
-    ```
+               # Here the ssh keys are available for use
+               - ... other steps where the repositories are cloned and/or or a submodule update
+   ```
    
 5. If, for some reason, you need to change the location of the SSH agent socket, you can use the `ssh-auth-sock` input to provide a path.
 
@@ -82,7 +82,7 @@ To support picking the right key in this use case, this action scans _key commen
 
 The submodules are supported, but not directly in the `checkout` action. They have to be cloned *after* the `ssh-agent` step. For example:
 
-```
+```yaml
 - uses: webfactory/ssh-agent@v0.5.3
   with:
     ssh-private-key: |
@@ -139,19 +139,19 @@ There are 2 ways you can achieve this:
 
 1. Add this step once in your job **before** any cargo command:
 
-```
+   ```
       - name: Update cargo config to use Git CLI
         run: Set-Content -Path $env:USERPROFILE\.cargo\config.toml "[net]`ngit-fetch-with-cli = true"
-```
+   ```
 
-This will configure Cargo to use the Git CLI as explained in the [Cargo's documentation](https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli).
+   This will configure Cargo to use the Git CLI as explained in the [Cargo's documentation](https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli).
 
 2. Alternatively you can set it to the environment variables for the entire workflow:
 
-```
-env:
-  CARGO_NET_GIT_FETCH_WITH_CLI: true
-```
+   ```
+    env:
+      CARGO_NET_GIT_FETCH_WITH_CLI: true
+   ```
 
 ### Using Deploy Keys with Swift Package Manager
 
