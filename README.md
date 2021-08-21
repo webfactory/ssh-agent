@@ -26,20 +26,25 @@ GitHub Actions only have access to the repository they run for. So, in order to 
   This key should start with `-----BEGIN ... PRIVATE KEY-----`, consist of many lines and ends with `-----END ... PRIVATE KEY-----`. 
 4. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v2` line.
 
-```yaml
-# .github/workflows/my-workflow.yml
-jobs:
-    my_job:
-        ...
-        steps:
-            - actions/checkout@v2
-            # Make sure the @v0.5.3 matches the current version of the
-            # action 
-            - uses: webfactory/ssh-agent@v0.5.3
-              with:
-                  ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-            - ... other steps
-```
+    ```yaml
+    # .github/workflows/my-workflow.yml
+    jobs:
+        my_job:
+            ...
+            steps:
+                # This action has to precede ssh-agent, since it undoes its effects
+                - uses: actions/checkout@v2
+                
+                # Make sure the @v0.5.3 matches the current version of the
+                # action 
+                - uses: webfactory/ssh-agent@v0.5.3
+                  with:
+                      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    
+                # Here the ssh keys are available for use
+                - ... other steps where the repositories are cloned and/or or a submodule update
+    ```
+   
 5. If, for some reason, you need to change the location of the SSH agent socket, you can use the `ssh-auth-sock` input to provide a path.
 
 ### Using Multiple Keys
@@ -49,7 +54,7 @@ There are cases where you might need to use multiple keys. For example, "[deploy
 You can set up different keys as different secrets and pass them all to the action like so:
 
 ```yaml
-# ... contens as before
+# ... contents as before
             - uses: webfactory/ssh-agent@v0.5.3
               with:
                   ssh-private-key: |
@@ -73,6 +78,22 @@ To support picking the right key in this use case, this action scans _key commen
 3. For key comments containing such URLs, a Git config setting is written that uses [`url.<base>.insteadof`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf). It will redirect `git` requests to URLs starting with either `https://github.com/owner/repo` or `git@github.com:owner/repo` to a fake hostname/URL like `git@...some.hash...:owner/repo`.
 4. An SSH configuration section is generated that applies to the fake hostname. It will map the SSH connection back to `github.com`, while at the same time pointing SSH to a file containing the appropriate key's public part. That will make SSH use the right key when connecting to GitHub.com.
 
+### Support for Submodules
+
+The submodules are supported, but not directly in the `checkout` action. They have to be cloned *after* the `ssh-agent` step. For example:
+
+```
+- uses: webfactory/ssh-agent@v0.5.3
+  with:
+    ssh-private-key: |
+          ${{ secrets.SSH_SUBMODULE1 }}
+          ${{ secrets.SSH_SUBMODULE2 }}  # etc.
+- name: Checkout submodules
+  run: git submodule update --init --recursive
+```
+
+This works under both Windows and Linux.
+
 ## Exported variables
 The action exports the `SSH_AUTH_SOCK` and `SSH_AGENT_PID` environment variables through the Github Actions core module.
 The `$SSH_AUTH_SOCK` is used by several applications like git or rsync to connect to the SSH authentication agent.
@@ -83,6 +104,12 @@ The `$SSH_AGENT_PID` contains the process id of the agent. This is used to kill 
 ### Works for the Current Job Only
 
 Since each job [runs in a fresh instance](https://help.github.com/en/articles/about-github-actions#job) of the virtual environment, the SSH key will only be available in the job where this action has been referenced. You can, of course, add the action in multiple jobs or even workflows. All instances can use the same `SSH_PRIVATE_KEY` secret.
+
+### Cannot Precede the `checkout` Action
+
+The `ssh-agent` step *cannot* precede the `checkout` step, though. The `checkout` action undoes the effects of `ssh-agent`. This will cause errors like:
+
+    ssh: Could not resolve hostname key-<hex-key-id>.github.com: Name or service not known
 
 ### SSH Private Key Format
 
