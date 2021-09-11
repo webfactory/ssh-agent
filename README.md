@@ -23,11 +23,11 @@ GitHub Actions only have access to the repository they run for. So, in order to 
 1. Generate a new SSH key with sufficient access privileges. For security reasons, don't use your personal SSH key but set up a dedicated one for use in GitHub Actions. See below for a few hints if you are unsure about this step.
 2. Make sure you don't have a passphrase set on the private key.
 3. Add the public SSH key to the private repository you are pulling from during the Github Action.
-3. Add the private SSH key to the repository triggering the Github Action: 
+4. Add the private SSH key to the repository triggering the Github Action: 
     * In your repository, go to the *Settings > Secrets* menu and create a new secret. In this example, we'll call it `SSH_PRIVATE_KEY`. 
     * Put the contents of the *private* SSH key file into the contents field. <br>
     * This key should start with `-----BEGIN ... PRIVATE KEY-----`, consist of many lines and ends with `-----END ... PRIVATE KEY-----`. 
-4. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v2` line.
+5. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v2` line.
 
 ```yaml
 # .github/workflows/my-workflow.yml
