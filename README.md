@@ -20,7 +20,7 @@ GitHub Actions only have access to the repository they run for. So, in order to 
 
 ## Usage
 
-1. Generate a new SSH key (if you will be pulling from multiple private repositories, please see the comments below in the Github Deploy Keys Section) with sufficient access privileges. For security reasons, don't use your personal SSH key but set up a dedicated one for use in GitHub Actions. See below for a few hints if you are unsure about this step.
+1. Generate a new SSH key with sufficient access privileges. For security reasons, don't use your personal SSH key but set up a dedicated one for use in GitHub Actions. See below for a few hints if you are unsure about this step.
 2. Make sure you don't have a passphrase set on the private key.
 3. Add the public SSH key to the private repository you are pulling from during the Github Action.
 3. Add the private SSH key to the repository triggering the Github Action: 
