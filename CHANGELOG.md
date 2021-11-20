@@ -7,6 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v0.5.4 [2021-11-21]
+
+### Fixed
+
+ * Update changed GitHub Host Keys (#102, #101)
+
+### Changed
+
+ * Various documentation (README) improvements and additions
+ * Change logging to more precisely state that _public_ keys are being printed
+
+## v0.5.3 [2021-06-11]
+
+### Fixed
+
+ * Fixed cleanup phase to really terminate the ssh-agent (#80)
+ * Fix termination of ssh-agent also on workflow faiulre (#79)
+
+### Changed
+
+ * Various documentation (README) improvements and additions
+
+## v0.5.2 [2021-04-07]
+
+### Fixed
+
+ * Use case-insensitive regex matching when scanning key comments (#68, #70, #71)
+
+### Changed
+
+ * Log when a key is _not_ used as a deploy key (#69)
+
+## v0.5.1 [2021-03-10]
+
+### Fixed
+
+ * Fix deployment key mapping on Windows virtual environment by using SSH binaries from the Git
+   suite, terminate ssh-agent upon actio termination on Windows as well (#63)
+ * Handle ENOENT exceptions with a graceful message
+
+### Changed
+
+ * Various documentation (README) improvements and additions
+
+## v0.5.0 [2021-02-19]
+
+### Added
+
+ * Add support for GitHub Deployment Keys through key comments (#59). Fixes #30, closes #38.
+ * Support for container-based workflows and Windows (#17)
+
+### Fixed
+
+ * Fix scripts/build.js to work on Windows (#38)
+
+### Changed
+
+ * Various documentation (README) improvements and additions
+
 ## v0.4.1 [2020-10-07]
 
 ### Fixed
