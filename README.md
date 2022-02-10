@@ -167,7 +167,7 @@ As a side note, using `ssh-keyscan` without proper key verification is susceptib
 ## Creating SSH Keys
 
 In order to create a new SSH key, run `ssh-keygen -t ed25519 -a 100 -f path/to/keyfile`, as suggested in [this blog post](https://stribika.github.io/2015/01/04/secure-secure-shell.html). 
-If you need to work with some older server software and need RSA keys, tr `ssh-keygen -t rsa -b 4096 -o -f path/to/keyfile` instead.
+If you need to work with some older server software and need RSA keys, try `ssh-keygen -t rsa -b 4096 -o -f path/to/keyfile` instead.
 
 Both commands will prompt you for a key passphrase and save the key in `path/to/keyfile`.
 In general, having a passphrase is a good thing, since it will keep the key encrypted on your disk. When using the key with this action, however, you need to make sure you don't 
