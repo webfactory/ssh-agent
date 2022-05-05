@@ -26,7 +26,7 @@ GitHub Actions only have access to the repository they run for. So, in order to 
 4. Add the private SSH key to the repository triggering the Github Action: 
     * In your repository, go to the *Settings > Secrets* menu and create a new secret. In this example, we'll call it `SSH_PRIVATE_KEY`. 
     * Put the contents of the *private* SSH key file into the contents field. <br>
-    * This key should start with `-----BEGIN ... PRIVATE KEY-----`, consist of many lines and ends with `-----END ... PRIVATE KEY-----`. 
+    * This key should start with `-----BEGIN ... PRIVATE KEY-----`, consist of many lines and ends with `-----END ... PRIVATE KEY-----`. Make sure there is a blank newline at the end of the secret value otherwise you will get errors like `Error loading key "(stdin)": invalid format` from `ssh-add`.
 5. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v2` line.
 
 ```yaml
