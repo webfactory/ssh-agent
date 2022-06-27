@@ -1,16 +1,21 @@
-name: 'webfactory/ssh-agent'
-description: 'Run `ssh-agent` and load an SSH key to access other private repositories'
+name: "webfactory/ssh-agent"
+description: "Run `ssh-agent` and load an SSH key to access other private repositories"
 inputs:
     ssh-private-key:
-        description: 'Private SSH key to register in the SSH agent'
+        description: "Private SSH key to register in the SSH agent"
         required: true
     ssh-auth-sock:
-        description: 'Where to place the SSH Agent auth socket'
+        description: "Where to place the SSH Agent auth socket"
+        required: false
+    linux-use-homedir:
+        description: Changes the way user home directory is looked up.
+        required: false
+        default: "false"
 runs:
-    using: 'node12'
-    main: 'dist/index.js'
-    post: 'dist/cleanup.js'
-    post-if: 'always()'
+    using: "node12"
+    main: "dist/index.js"
+    post: "dist/cleanup.js"
+    post-if: "always()"
 branding:
     icon: loader
-    color: 'yellow'
+    color: "yellow"

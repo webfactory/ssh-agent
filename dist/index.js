@@ -119,10 +119,14 @@ const core = __webpack_require__(470);
 const child_process = __webpack_require__(129);
 const fs = __webpack_require__(747);
 const crypto = __webpack_require__(417);
-const { home, sshAgent, sshAdd } = __webpack_require__(972);
+const getPaths = __webpack_require__(972);
+
 
 try {
     const privateKey = core.getInput('ssh-private-key');
+    const linuxUseHomedir = core.getInput('linux-use-homedir');
+
+    const { home, sshAgent, sshAdd } = getPaths(linuxUseHomedir);
 
     if (!privateKey) {
         core.setFailed("The ssh-private-key argument is empty. Maybe the secret has not been configured, or you are using a wrong secret name in your workflow file.");
@@ -145,7 +149,7 @@ try {
     const sshAgentArgs = (authSock && authSock.length > 0) ? ['-a', authSock] : [];
 
     // Extract auth socket path and agent pid and set them as job variables
-    child_process.execFileSync(sshAgent, sshAgentArgs).toString().split("\n").forEach(function(line) {
+    child_process.execFileSync(sshAgent, sshAgentArgs).toString().split("\n").forEach(function (line) {
         const matches = /^(SSH_AUTH_SOCK|SSH_AGENT_PID)=(.*); export \1/.exec(line);
 
         if (matches && matches.length > 0) {
@@ -157,7 +161,7 @@ try {
 
     console.log("Adding private key(s) to agent");
 
-    privateKey.split(/(?=-----BEGIN)/).forEach(function(key) {
+    privateKey.split(/(?=-----BEGIN)/).forEach(function (key) {
         child_process.execFileSync(sshAdd, ['-'], { input: key.trim() + "\n" });
     });
 
@@ -167,7 +171,7 @@ try {
 
     console.log('Configuring deployment key(s)');
 
-    child_process.execFileSync(sshAdd, ['-L']).toString().split(/\r?\n/).forEach(function(key) {
+    child_process.execFileSync(sshAdd, ['-L']).toString().split(/\r?\n/).forEach(function (key) {
         const parts = key.match(/\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/i);
 
         if (!parts) {
@@ -186,9 +190,9 @@ try {
         child_process.execSync(`git config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
 
         const sshConfig = `\nHost key-${sha256}.github.com\n`
-                              + `    HostName github.com\n`
-                              + `    IdentityFile ${homeSsh}/key-${sha256}\n`
-                              + `    IdentitiesOnly yes\n`;
+            + `    HostName github.com\n`
+            + `    IdentityFile ${homeSsh}/key-${sha256}\n`
+            + `    IdentitiesOnly yes\n`;
 
         fs.appendFileSync(`${homeSsh}/config`, sshConfig);
 
@@ -572,23 +576,24 @@ module.exports = require("fs");
 
 const os = __webpack_require__(87);
 
-module.exports = (process.env['OS'] != 'Windows_NT') ? {
+module.exports = (linuxUseHomedir) => {
+    (process.env['OS'] != 'Windows_NT') ? {
 
-    // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
-    // Action runs, where $HOME is different from the pwent
-    home: os.userInfo().homedir,
-    sshAgent: 'ssh-agent',
-    sshAdd: 'ssh-add'
+        // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
+        // Action runs, where $HOME is different from the pwent
+        // Adds ability to use use os.homedir() to try and counter https://github.com/nodejs/node/issues/25714
+        home: linuxUseHomedir === "true" ? os.homedir() : os.userInfo().homedir,
+        sshAgent: 'ssh-agent',
+        sshAdd: 'ssh-add'
 
-} : {
+    } : {
 
-    home: os.homedir(),
-    sshAgent: 'c://progra~1//git//usr//bin//ssh-agent.exe',
-    sshAdd: 'c://progra~1//git//usr//bin//ssh-add.exe'
+        home: os.homedir(),
+        sshAgent: 'c://progra~1//git//usr//bin//ssh-agent.exe',
+        sshAdd: 'c://progra~1//git//usr//bin//ssh-add.exe'
 
-};
-
-
+    };
+}
 
 /***/ })
 
