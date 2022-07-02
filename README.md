@@ -156,7 +156,7 @@ When using `ssh` to connect from the GitHub Action worker node to another machin
 
 ### Provide the SSH Key as a File
 
-This Action is designed to pass the SSH key directly into `ssh-agent`; that is, the key is available in memory on the GitHub Action worker node, but never written to disk. As a consequence, you _cannot_ pass the key as a build argument or a mounted file into Docker containers that you build or run on the worker node. You _can_, however, mount the `ssh-agent` Unix socket into a Docker container that you _run_, set up the `SSH_AUTH_SOCK` env var and then use SSH from within the container (see #11).
+This Action is designed to pass the SSH key directly into `ssh-agent`; that is, the key is available in memory on the GitHub Action worker node, but never written to disk. As a consequence, you _cannot_ pass the key as a build argument or a mounted file into Docker containers that you build or run on the worker node. You _can_, however, mount the `ssh-agent` Unix socket into a Docker container that you _run_, set up the `SSH_AUTH_SOCK` env var and then use SSH from within the container (see https://github.com/webfactory/ssh-agent/issues/11).
 
 ### Run `ssh-keyscan` to Add Host Keys for Additional Hosts
 
