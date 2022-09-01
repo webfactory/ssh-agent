@@ -219,4 +219,4 @@ developer looking for new challenges, we'd like to hear from you!
 - <https://www.webfactory.de>
 - <https://twitter.com/webfactory>
 
-Copyright 2019 – 2021 webfactory GmbH, Bonn. Code released under [the MIT license](LICENSE).
+Copyright 2019 – 2022 webfactory GmbH, Bonn. Code released under [the MIT license](LICENSE).
