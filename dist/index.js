@@ -324,25 +324,9 @@ const fs = __webpack_require__(747);
 const crypto = __webpack_require__(417);
 const { home, sshAgent, sshAdd } = __webpack_require__(972);
 
-// FIXME: slightly modified version of never version of core.getBooleanInput
-//        as that doesn't respect required:false
-core.getBooleanInput = function getBooleanInput(name, options) {
-  const trueValue = ['true', 'True', 'TRUE']
-  const falseValue = ['false', 'False', 'FALSE']
-  const val = core.getInput(name, options)
-  if (!val) return false // replace with default InputOption
-  if (trueValue.includes(val)) return true
-  if (falseValue.includes(val)) return false
-  throw new TypeError(
-    `Input does not meet YAML 1.2 "Core Schema" specification: ${name}\n` +
-      `Support boolean input list: \`true | True | TRUE | false | False | FALSE\``
-  )
-}
-
-
 try {
     const privateKey = core.getInput('ssh-private-key');
-    const logPublicKey = core.getBooleanInput('log-public-key', {required: false});
+    const dontLogPublicKey = core.getBooleanInput('dont-log-public-key', {default: false});
 
     if (!privateKey) {
         core.setFailed("The ssh-private-key argument is empty. Maybe the secret has not been configured, or you are using a wrong secret name in your workflow file.");
@@ -391,7 +375,7 @@ try {
         const parts = key.match(/\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/i);
 
         if (!parts) {
-            if (logPublicKey) {
+            if (!dontLogPublicKey) {
               console.log(`Comment for (public) key '${key}' does not match GitHub URL pattern. Not treating it as a GitHub deploy key.`);
             }
             return;
