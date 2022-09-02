@@ -6,9 +6,10 @@ inputs:
         required: true
     ssh-auth-sock:
         description: 'Where to place the SSH Agent auth socket'
-    log-public-key:
+    dont-log-public-key:
         description: 'Whether or not to log public key fingerprints'
-        default: true
+        required: false
+        default: false
 runs:
     using: 'node12'
     main: 'dist/index.js'
