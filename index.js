@@ -4,25 +4,9 @@ const fs = require('fs');
 const crypto = require('crypto');
 const { home, sshAgent, sshAdd } = require('./paths.js');
 
-// FIXME: slightly modified version of never version of core.getBooleanInput
-//        as that doesn't respect required:false
-core.getBooleanInput = function getBooleanInput(name, options) {
-  const trueValue = ['true', 'True', 'TRUE']
-  const falseValue = ['false', 'False', 'FALSE']
-  const val = core.getInput(name, options)
-  if (!val) return false // replace with default InputOption
-  if (trueValue.includes(val)) return true
-  if (falseValue.includes(val)) return false
-  throw new TypeError(
-    `Input does not meet YAML 1.2 "Core Schema" specification: ${name}\n` +
-      `Support boolean input list: \`true | True | TRUE | false | False | FALSE\``
-  )
-}
-
-
 try {
     const privateKey = core.getInput('ssh-private-key');
-    const logPublicKey = core.getBooleanInput('log-public-key', {required: false});
+    const logPublicKey = core.getBooleanInput('log-public-key');
 
     if (!privateKey) {
         core.setFailed("The ssh-private-key argument is empty. Maybe the secret has not been configured, or you are using a wrong secret name in your workflow file.");
