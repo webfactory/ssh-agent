@@ -2,7 +2,7 @@
     "name": "webfactory-action-ssh-agent",
     "repository": "git@github.com:webfactory/ssh-agent.git",
     "description": "GitHub Action to set up ssh-agent with a private SSH key",
-    "version": "0.1.0",
+    "version": "0.5.4",
     "main": "index.js",
     "author": "webfactory GmbH <info@webfactory.de>",
     "license": "MIT",
