@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v0.5.5 [2022-10-22]
+
+### Changed
+
+ * Upgrade Node from 12 to 16
+
 ## v0.5.4 [2021-11-21]
 
 ### Fixed
