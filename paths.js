@@ -6,13 +6,14 @@ module.exports = (process.env['OS'] != 'Windows_NT') ? {
     // Action runs, where $HOME is different from the pwent
     home: os.userInfo().homedir,
     sshAgent: 'ssh-agent',
-    sshAdd: 'ssh-add'
+    sshAdd: 'ssh-add',
+    gitPath: 'git'
 
 } : {
 
     home: os.homedir(),
     sshAgent: 'c://progra~1//git//usr//bin//ssh-agent.exe',
-    sshAdd: 'c://progra~1//git//usr//bin//ssh-add.exe'
-
+    sshAdd: 'c://progra~1//git//usr//bin//ssh-add.exe',
+    gitPath: 'c://progra~1//git//usr//bin//git.exe'
 };
 

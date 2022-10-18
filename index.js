@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const child_process = require('child_process');
 const fs = require('fs');
 const crypto = require('crypto');
-const { home, sshAgent, sshAdd } = require('./paths.js');
+const { home, sshAgent, sshAdd, gitPath } = require('./paths.js');
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -64,9 +64,9 @@ try {
 
         fs.writeFileSync(`${homeSsh}/key-${sha256}`, key + "\n", { mode: '600' });
 
-        child_process.execSync(`git config --global --replace-all url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "https://github.com/${ownerAndRepo}"`);
-        child_process.execSync(`git config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
-        child_process.execSync(`git config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
+        child_process.execSync(`${gitPath} config --global --replace-all url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "https://github.com/${ownerAndRepo}"`);
+        child_process.execSync(`${gitPath} config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
+        child_process.execSync(`${gitPath} config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
 
         const sshConfig = `\nHost key-${sha256}.github.com\n`
                               + `    HostName github.com\n`
