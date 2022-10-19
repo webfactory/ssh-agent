@@ -7,8 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v0.7.0 [2022-10-19]
+
+### Added
+
  * Add the `log-public-key` input that can be used to turn off logging key identities (#122)
+
+### Fixed
+
  * Fix path to `git` binary on Windows, assuming GitHub-hosted runners (#136, #137)
+ * Fix a nonsensical log message (#139)
 
 ## v0.6.0 [2022-10-19]
 
@@ -32,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
  * Fixed cleanup phase to really terminate the ssh-agent (#80)
- * Fix termination of ssh-agent also on workflow faiulre (#79)
+ * Fix termination of ssh-agent also on workflow failure (#79)
 
 ### Changed
 
