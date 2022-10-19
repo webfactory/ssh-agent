@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## v0.6.0 [2022-10-11]
+## v0.6.0 [2022-10-19]
+
 ### Changed
-* Update node to node16
+
+ * Update the version of Node used by the action from 12 to 16 (https://github.blog/changelog/2022-09-22-github-actions-all-actions-will-begin-running-on-node16-instead-of-node12/).
 
 ## v0.5.4 [2021-11-21]
 
