@@ -76,7 +76,16 @@ To support picking the right key in this use case, this action scans _key commen
 3. For key comments containing such URLs, a Git config setting is written that uses [`url.<base>.insteadof`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf). It will redirect `git` requests to URLs starting with either `https://github.com/owner/repo` or `git@github.com:owner/repo` to a fake hostname/URL like `git@...some.hash...:owner/repo`.
 4. An SSH configuration section is generated that applies to the fake hostname. It will map the SSH connection back to `github.com`, while at the same time pointing SSH to a file containing the appropriate key's public part. That will make SSH use the right key when connecting to GitHub.com.
 
+## Action Inputs
+
+The following inputs can be used to control the action's behavior:
+
+* `ssh-private-key`: Required. Use this to provide the key(s) to load as GitHub Actions secrets.
+* `ssh-auth-sock`: Can be used to control where the SSH agent socket will be placed. Ultimately affects the `$SSH_AUTH_SOCK` environment variable.
+* `log-public-key`: Set this to `false` if you want to suppress logging of _public_ key information. To simplify debugging and since it contains public key information only, this is turned on by default.
+
 ## Exported variables
+
 The action exports the `SSH_AUTH_SOCK` and `SSH_AGENT_PID` environment variables through the Github Actions core module.
 The `$SSH_AUTH_SOCK` is used by several applications like git or rsync to connect to the SSH authentication agent.
 The `$SSH_AGENT_PID` contains the process id of the agent. This is used to kill the agent in post job action.
