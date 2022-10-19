@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
  * Add the `log-public-key` input that can be used to turn off logging key identities (#122)
+ * Fix path to `git` binary on Windows, assuming GitHub-hosted runners (#136, #137)
 
 ## v0.6.0 [2022-10-19]
 
