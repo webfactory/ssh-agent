@@ -114,7 +114,7 @@ If you are using this action on container-based workflows, make sure the contain
 
 If you are using the `docker/build-push-action`, and would like to pass the SSH key, you can do so by adding the following config to pass the socket file through:
 
-```
+```yml
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
@@ -122,6 +122,36 @@ If you are using the `docker/build-push-action`, and would like to pass the SSH 
           ssh: |
             default=${{ env.SSH_AUTH_SOCK }}
 ```
+
+### Using the `docker/build-push-action` Action together with multiple Deploy Keys
+
+If you use the `docker/build-push-action` and want to use multiple GitHub deploy keys, you need to copy the git and ssh configuration to the container during the build. Otherwise, the Docker build process would still not know how to handle multiple deploy keys. Even if the ssh agent was set up correctly on the runner.
+
+This requires an additional step in the actions workflow and two additional lines in the Dockerfile.
+
+Workflow:
+```yml
+      - name: Prepare git and ssh config for build context
+        run: |
+          mkdir root-config
+          cp -r ~/.gitconfig  ~/.ssh root-config/
+  
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          ssh: |
+            default=${{ env.SSH_AUTH_SOCK }}
+```
+
+Dockerfile:
+```Dockerfile
+COPY root-config /root/
+RUN sed 's|/home/runner|/root|g' -i.bak /root/.ssh/config
+```
+
+Have in mind that the Dockerfile now contains customized git and ssh configurations. If you don't want that in your final image, use multi-stage builds.
+
 
 ### Cargo's (Rust) Private Dependencies on Windows
 
