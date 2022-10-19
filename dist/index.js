@@ -322,7 +322,7 @@ const core = __webpack_require__(470);
 const child_process = __webpack_require__(129);
 const fs = __webpack_require__(747);
 const crypto = __webpack_require__(417);
-const { home, sshAgent, sshAdd } = __webpack_require__(972);
+const { homePath, sshAgentPath, sshAddPath, gitPath } = __webpack_require__(972);
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -333,7 +333,7 @@ try {
         return;
     }
 
-    const homeSsh = home + '/.ssh';
+    const homeSsh = homePath + '/.ssh';
 
     console.log(`Adding GitHub.com keys to ${homeSsh}/known_hosts`);
 
@@ -348,7 +348,7 @@ try {
     const sshAgentArgs = (authSock && authSock.length > 0) ? ['-a', authSock] : [];
 
     // Extract auth socket path and agent pid and set them as job variables
-    child_process.execFileSync(sshAgent, sshAgentArgs).toString().split("\n").forEach(function(line) {
+    child_process.execFileSync(sshAgentPath, sshAgentArgs).toString().split("\n").forEach(function(line) {
         const matches = /^(SSH_AUTH_SOCK|SSH_AGENT_PID)=(.*); export \1/.exec(line);
 
         if (matches && matches.length > 0) {
@@ -361,16 +361,16 @@ try {
     console.log("Adding private key(s) to agent");
 
     privateKey.split(/(?=-----BEGIN)/).forEach(function(key) {
-        child_process.execFileSync(sshAdd, ['-'], { input: key.trim() + "\n" });
+        child_process.execFileSync(sshAddPath, ['-'], { input: key.trim() + "\n" });
     });
 
     console.log("Key(s) added:");
 
-    child_process.execFileSync(sshAdd, ['-l'], { stdio: 'inherit' });
+    child_process.execFileSync(sshAddPath, ['-l'], { stdio: 'inherit' });
 
     console.log('Configuring deployment key(s)');
 
-    child_process.execFileSync(sshAdd, ['-L']).toString().split(/\r?\n/).forEach(function(key) {
+    child_process.execFileSync(sshAddPath, ['-L']).toString().split(/\r?\n/).forEach(function(key) {
         const parts = key.match(/\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/i);
 
         if (!parts) {
@@ -384,9 +384,9 @@ try {
 
         fs.writeFileSync(`${homeSsh}/key-${sha256}`, key + "\n", { mode: '600' });
 
-        child_process.execSync(`git config --global --replace-all url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "https://github.com/${ownerAndRepo}"`);
-        child_process.execSync(`git config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
-        child_process.execSync(`git config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
+        child_process.execSync(`${gitPath} config --global --replace-all url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "https://github.com/${ownerAndRepo}"`);
+        child_process.execSync(`${gitPath} config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
+        child_process.execSync(`${gitPath} config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
 
         const sshConfig = `\nHost key-${sha256}.github.com\n`
                               + `    HostName github.com\n`
@@ -2904,16 +2904,17 @@ module.exports = (process.env['OS'] != 'Windows_NT') ? {
 
     // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
     // Action runs, where $HOME is different from the pwent
-    home: os.userInfo().homedir,
-    sshAgent: 'ssh-agent',
-    sshAdd: 'ssh-add'
+    homePath: os.userInfo().homedir,
+    sshAgentPath: 'ssh-agent',
+    sshAddPath: 'ssh-add',
+    gitPath: 'git'
 
 } : {
 
-    home: os.homedir(),
-    sshAgent: 'c://progra~1//git//usr//bin//ssh-agent.exe',
-    sshAdd: 'c://progra~1//git//usr//bin//ssh-add.exe'
-
+    homePath: os.homedir(),
+    sshAgentPath: 'c://progra~1//git//usr//bin//ssh-agent.exe',
+    sshAddPath: 'c://progra~1//git//usr//bin//ssh-add.exe',
+    gitPath: 'c://progra~1//git//usr//bin//git.exe'
 };
 
 
