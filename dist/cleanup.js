@@ -599,12 +599,12 @@ exports.debug = debug; // for test
 
 const core = __webpack_require__(470);
 const { execFileSync } = __webpack_require__(129);
-const { sshAgent } = __webpack_require__(972);
+const { sshAgentCmd } = __webpack_require__(972);
 
 try {
     // Kill the started SSH agent
     console.log('Stopping SSH agent');
-    execFileSync(sshAgent, ['-k'], { stdio: 'inherit' });
+    execFileSync(sshAgentCmd, ['-k'], { stdio: 'inherit' });
 } catch (error) {
     console.log(error.message);
     console.log('Error stopping the SSH agent, proceeding anyway');
@@ -2824,21 +2824,19 @@ exports.default = _default;
 const os = __webpack_require__(87);
 
 module.exports = (process.env['OS'] != 'Windows_NT') ? {
-
     // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
     // Action runs, where $HOME is different from the pwent
-    home: os.userInfo().homedir,
-    sshAgent: 'ssh-agent',
-    sshAdd: 'ssh-add'
-
+    homePath: os.userInfo().homedir,
+    sshAgentCmd: 'ssh-agent',
+    sshAddCmd: 'ssh-add',
+    gitCmd: 'git'
 } : {
-
-    home: os.homedir(),
-    sshAgent: 'c://progra~1//git//usr//bin//ssh-agent.exe',
-    sshAdd: 'c://progra~1//git//usr//bin//ssh-add.exe'
-
+    // Assuming GitHub hosted `windows-*` runners for now
+    homePath: os.homedir(),
+    sshAgentCmd: 'c://progra~1//git//usr//bin//ssh-agent.exe',
+    sshAddCmd: 'c://progra~1//git//usr//bin//ssh-add.exe',
+    gitCmd: 'c://progra~1//git//usr//bin//git.exe'
 };
-
 
 
 /***/ })
