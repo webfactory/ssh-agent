@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const child_process = require('child_process');
 const fs = require('fs');
 const crypto = require('crypto');
-const { home, sshAgent, sshAdd, gitPath } = require('./paths.js');
+const { homePath, sshAgentPath, sshAddPath, gitPath } = require('./paths.js');
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -13,7 +13,7 @@ try {
         return;
     }
 
-    const homeSsh = home + '/.ssh';
+    const homeSsh = homePath + '/.ssh';
 
     console.log(`Adding GitHub.com keys to ${homeSsh}/known_hosts`);
 
@@ -28,7 +28,7 @@ try {
     const sshAgentArgs = (authSock && authSock.length > 0) ? ['-a', authSock] : [];
 
     // Extract auth socket path and agent pid and set them as job variables
-    child_process.execFileSync(sshAgent, sshAgentArgs).toString().split("\n").forEach(function(line) {
+    child_process.execFileSync(sshAgentPath, sshAgentArgs).toString().split("\n").forEach(function(line) {
         const matches = /^(SSH_AUTH_SOCK|SSH_AGENT_PID)=(.*); export \1/.exec(line);
 
         if (matches && matches.length > 0) {
@@ -41,16 +41,16 @@ try {
     console.log("Adding private key(s) to agent");
 
     privateKey.split(/(?=-----BEGIN)/).forEach(function(key) {
-        child_process.execFileSync(sshAdd, ['-'], { input: key.trim() + "\n" });
+        child_process.execFileSync(sshAddPath, ['-'], { input: key.trim() + "\n" });
     });
 
     console.log("Key(s) added:");
 
-    child_process.execFileSync(sshAdd, ['-l'], { stdio: 'inherit' });
+    child_process.execFileSync(sshAddPath, ['-l'], { stdio: 'inherit' });
 
     console.log('Configuring deployment key(s)');
 
-    child_process.execFileSync(sshAdd, ['-L']).toString().split(/\r?\n/).forEach(function(key) {
+    child_process.execFileSync(sshAddPath, ['-L']).toString().split(/\r?\n/).forEach(function(key) {
         const parts = key.match(/\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/i);
 
         if (!parts) {
