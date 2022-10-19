@@ -371,7 +371,7 @@ try {
 
     console.log('Configuring deployment key(s)');
 
-    child_process.execFileSync(sshAddCmd, ['-L']).toString().split(/\r?\n/).forEach(function(key) {
+    child_process.execFileSync(sshAddCmd, ['-L']).toString().trim().split(/\r?\n/).forEach(function(key) {
         const parts = key.match(/\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/i);
 
         if (!parts) {
