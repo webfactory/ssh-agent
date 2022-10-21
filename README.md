@@ -83,6 +83,7 @@ The following inputs can be used to control the action's behavior:
 * `ssh-private-key`: Required. Use this to provide the key(s) to load as GitHub Actions secrets.
 * `ssh-auth-sock`: Can be used to control where the SSH agent socket will be placed. Ultimately affects the `$SSH_AUTH_SOCK` environment variable.
 * `log-public-key`: Set this to `false` if you want to suppress logging of _public_ key information. To simplify debugging and since it contains public key information only, this is turned on by default.
+* `skip-known-hosts`: Set this to `true` if you want to skip adding the GitHub keys to the known_hosts. By default this is set to `false` for backwards compatibility (i.e. add GitHub keys to known_hosts).
 
 ## Exported variables
 
