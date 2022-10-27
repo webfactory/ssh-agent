@@ -123,25 +123,35 @@ If you are using the `docker/build-push-action`, and would like to pass the SSH 
             default=${{ env.SSH_AUTH_SOCK }}
 ```
 
-### Using the `docker/build-push-action` Action together with multiple Deploy Keys
+### Using docker based workflows together with multiple Deploy Keys
 
-If you use the `docker/build-push-action` and want to use multiple GitHub deploy keys, you need to copy the git and ssh configuration to the container during the build. Otherwise, the Docker build process would still not know how to handle multiple deploy keys. Even if the ssh agent was set up correctly on the runner.
+If you use one of:
+* the `docker/build-push-action`
+* manual `docker build`
+* manual `docker compose build` 
 
-This requires an additional step in the actions workflow and two additional lines in the Dockerfile.
+and want to use multiple GitHub deploy keys, you need to copy the git and ssh configuration to the container during the build. Otherwise, the Docker build process would still not know how to handle multiple deploy keys. Even if the ssh agent was set up correctly on the runner.
+
+This requires an additional step in the actions workflow **after** the ssh-agent step and **before** the docker build step.
+You also need two additional lines in the Dockerfile to actually copy the configs.
+
+This does the following: 
+* make the git and ssh configs accessible to Docker 
+* copy the configs into the build stage
 
 Workflow:
 ```yml
+      - name: ssh-agent setup
+        ...
+
       - name: Prepare git and ssh config for build context
         run: |
           mkdir root-config
           cp -r ~/.gitconfig  ~/.ssh root-config/
   
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          ssh: |
-            default=${{ env.SSH_AUTH_SOCK }}
+      - name: Docker build 
+        # build-push-action | docker [compose] build | etc.
+        ...
 ```
 
 Dockerfile:
@@ -152,6 +162,8 @@ RUN sed 's|/home/runner|/root|g' -i.bak /root/.ssh/config
 
 Have in mind that the Dockerfile now contains customized git and ssh configurations. If you don't want that in your final image, use multi-stage builds.
 
+If you still get the error message: `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.` you most likely forgot one of the steps above.
+    
 
 ### Cargo's (Rust) Private Dependencies on Windows
 
