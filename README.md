@@ -52,7 +52,7 @@ There are cases where you might need to use multiple keys. For example, "[deploy
 You can set up different keys as different secrets and pass them all to the action like so:
 
 ```yaml
-# ... contens as before
+# ... contents as before
             - uses: webfactory/ssh-agent@v0.6.0
               with:
                   ssh-private-key: |
