@@ -322,7 +322,7 @@ const core = __webpack_require__(470);
 const child_process = __webpack_require__(129);
 const fs = __webpack_require__(747);
 const crypto = __webpack_require__(417);
-const { homePath, sshAgentCmd, sshAddCmd, gitCmd } = __webpack_require__(972);
+const { homePath, sshAgentCmd, sshAddCmd, gitCmd, pathsCmd } = __webpack_require__(972);
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -353,6 +353,10 @@ try {
         const matches = /^(SSH_AUTH_SOCK|SSH_AGENT_PID)=(.*); export \1/.exec(line);
 
         if (matches && matches.length > 0) {
+            // use pathsCmd to convert socket file to a windows path
+            if (pathsCmd && matches[1] === "SSH_AUTH_SOCK") {
+                matches[2] = child_process.execFileSync(pathsCmd, ['-m', matches[2]]).toString().trim()
+            }
             // This will also set process.env accordingly, so changes take effect for this script
             core.exportVariable(matches[1], matches[2])
             console.log(`${matches[1]}=${matches[2]}`);
@@ -2914,7 +2918,8 @@ module.exports = (process.env['OS'] != 'Windows_NT') ? {
     homePath: os.homedir(),
     sshAgentCmd: 'c://progra~1//git//usr//bin//ssh-agent.exe',
     sshAddCmd: 'c://progra~1//git//usr//bin//ssh-add.exe',
-    gitCmd: 'c://progra~1//git//bin//git.exe'
+    gitCmd: 'c://progra~1//git//bin//git.exe',
+    pathsCmd: 'c://progra~1//git//usr//bin//cygpath.exe'
 };
 
 

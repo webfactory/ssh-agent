@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const child_process = require('child_process');
 const fs = require('fs');
 const crypto = require('crypto');
-const { homePath, sshAgentCmd, sshAddCmd, gitCmd } = require('./paths.js');
+const { homePath, sshAgentCmd, sshAddCmd, gitCmd, pathsCmd } = require('./paths.js');
 
 try {
     const privateKey = core.getInput('ssh-private-key');
@@ -33,6 +33,10 @@ try {
         const matches = /^(SSH_AUTH_SOCK|SSH_AGENT_PID)=(.*); export \1/.exec(line);
 
         if (matches && matches.length > 0) {
+            // use pathsCmd to convert socket file to a windows path
+            if (pathsCmd && matches[1] === "SSH_AUTH_SOCK") {
+                matches[2] = child_process.execFileSync(pathsCmd, ['-m', matches[2]]).toString().trim()
+            }
             // This will also set process.env accordingly, so changes take effect for this script
             core.exportVariable(matches[1], matches[2])
             console.log(`${matches[1]}=${matches[2]}`);

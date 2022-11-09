@@ -12,5 +12,6 @@ module.exports = (process.env['OS'] != 'Windows_NT') ? {
     homePath: os.homedir(),
     sshAgentCmd: 'c://progra~1//git//usr//bin//ssh-agent.exe',
     sshAddCmd: 'c://progra~1//git//usr//bin//ssh-add.exe',
-    gitCmd: 'c://progra~1//git//bin//git.exe'
+    gitCmd: 'c://progra~1//git//bin//git.exe',
+    pathsCmd: 'c://progra~1//git//usr//bin//cygpath.exe'
 };
