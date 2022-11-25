@@ -123,28 +123,30 @@ If you are using the `docker/build-push-action`, and would like to pass the SSH 
             default=${{ env.SSH_AUTH_SOCK }}
 ```
 
-### Using docker based workflows together with multiple Deploy Keys
+Make sure not to miss the next section, though.
+
+### Forwarding the SSH agent into Docker build processes, together with multiple Deploy Keys
 
 If you use one of:
 * the `docker/build-push-action`
 * manual `docker build`
 * manual `docker compose build` 
 
-and want to use multiple GitHub deploy keys, you need to copy the git and ssh configuration to the container during the build. Otherwise, the Docker build process would still not know how to handle multiple deploy keys. Even if the ssh agent was set up correctly on the runner.
+_and_ want to use multiple GitHub deploy keys, you need to copy the Git and SSH configuration to the container during the build. This is necessary so that Git can pick the right one from your deployment keys. This is necessary _in addition to_ forwarding the SSH agent socket into the build process.
 
-This requires an additional step in the actions workflow **after** the ssh-agent step and **before** the docker build step.
-You also need two additional lines in the Dockerfile to actually copy the configs.
+This requires an additional step in the workflow file **after** the `ssh-agent` step and **before** the Docker build step.  You also need two additional lines in the `Dockerfile` to actually copy the configs.
 
-This does the following: 
-* make the git and ssh configs accessible to Docker 
-* copy the configs into the build stage
+The following example will: 
+* collect the necessary Git and SSH configuration files in a directory that must be part of the Docker build context so that... 
+* ... the files can be copied into the Docker image (or an intermediate build stage).
 
 Workflow:
+
 ```yml
       - name: ssh-agent setup
         ...
 
-      - name: Prepare git and ssh config for build context
+      - name: Collect Git and SSH config files in a directory that is part of the Docker build context
         run: |
           mkdir root-config
           cp -r ~/.gitconfig  ~/.ssh root-config/
@@ -155,15 +157,16 @@ Workflow:
 ```
 
 Dockerfile:
+
 ```Dockerfile
+# Copy the two files in place and fix different path/locations inside the Docker image
 COPY root-config /root/
 RUN sed 's|/home/runner|/root|g' -i.bak /root/.ssh/config
 ```
 
-Have in mind that the Dockerfile now contains customized git and ssh configurations. If you don't want that in your final image, use multi-stage builds.
+Keep in mind that the resulting Docker image now might contain these customized Git and SSH configuration files! Your private SSH keys are never written to files anywhere, just loaded into the SSH agent and forwarded into the container. The config files might, however, give away details about your build or development process and contain the names and URLs of your (private) repositories. You might want to use a multi-staged build to make sure these files do not end up in the final image.
 
-If you still get the error message: `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.` you most likely forgot one of the steps above.
-    
+If you still get the error message: `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.`, you most likely forgot one of the steps above.
 
 ### Cargo's (Rust) Private Dependencies on Windows
 
