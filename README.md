@@ -35,13 +35,12 @@ jobs:
     my_job:
         ...
         steps:
-            - actions/checkout@v2
-            # Make sure the @v0.7.0 matches the current version of the
-            # action 
+            - uses: actions/checkout@v3
+            # Make sure the @v0.7.0 matches the current version of the action
             - uses: webfactory/ssh-agent@v0.7.0
               with:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-            - ... other steps
+            # ... other steps
 ```
 5. If, for some reason, you need to change the location of the SSH agent socket, you can use the `ssh-auth-sock` input to provide a path.
 
