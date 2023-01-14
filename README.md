@@ -82,6 +82,9 @@ The following inputs can be used to control the action's behavior:
 * `ssh-private-key`: Required. Use this to provide the key(s) to load as GitHub Actions secrets.
 * `ssh-auth-sock`: Can be used to control where the SSH agent socket will be placed. Ultimately affects the `$SSH_AUTH_SOCK` environment variable.
 * `log-public-key`: Set this to `false` if you want to suppress logging of _public_ key information. To simplify debugging and since it contains public key information only, this is turned on by default.
+* `ssh-agent-cmd`: Optional. Use this to specify a custom location for the `ssh-agent` binary.
+* `ssh-add-cmd`: Optional. Use this to specify a custom location for the `ssh-add` binary.
+* `git-cmd`: Optional. Use this to specify a custom location for the `ssh-agent` binary.
 
 ## Exported variables
 
