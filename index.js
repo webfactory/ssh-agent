@@ -12,9 +12,9 @@ try {
     const sshAddCmdInput = core.getInput('ssh-add-cmd');
     const gitCmdInput = core.getInput('git-cmd');
 
-    const sshAgentCmd = sshAgentCmdInput ? sshAgentCmdInput : sshAgentCmdDefault
-    const sshAddCmd = sshAddCmdInput ? sshAddCmdInput : sshAddCmdDefault
-    const gitCmd = gitCmdInput ? gitCmdInput : gitCmdDefault
+    const sshAgentCmd = sshAgentCmdInput ? sshAgentCmdInput : sshAgentCmdDefault;
+    const sshAddCmd = sshAddCmdInput ? sshAddCmdInput : sshAddCmdDefault;
+    const gitCmd = gitCmdInput ? gitCmdInput : gitCmdDefault;
 
     if (!privateKey) {
         core.setFailed("The ssh-private-key argument is empty. Maybe the secret has not been configured, or you are using a wrong secret name in your workflow file.");
