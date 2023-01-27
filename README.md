@@ -112,9 +112,11 @@ If you know that your favorite tool or platform of choice requires extra tweaks 
 
 If you are using this action on container-based workflows, make sure the container has the necessary SSH binaries or package(s) installed.
 
-### Using the `docker/build-push-action` Action
+### Building Docker Images and/or Using the `docker/build-push-action` Action
 
-If you are using the `docker/build-push-action`, and would like to pass the SSH key, you can do so by adding the following config to pass the socket file through:
+When you are building Docker images with `docker build` or `docker compose build` and need to provide the SSH keys to the build, don't forget to pass `--ssh default=${{ env.SSH_AUTH_SOCK }}` on the command line to pass the SSH agent socket through. See the [Docker documentation](https://docs.docker.com/engine/reference/commandline/buildx_build/#ssh) for more information on this option.
+
+If you are using the `docker/build-push-action`, you can do so by adding the following config.
 
 ```yml
       - name: Build and push
@@ -125,35 +127,45 @@ If you are using the `docker/build-push-action`, and would like to pass the SSH 
             default=${{ env.SSH_AUTH_SOCK }}
 ```
 
-### Using the `docker/build-push-action` Action together with multiple Deploy Keys
+Make sure not to miss the next section, though.
 
-If you use the `docker/build-push-action` and want to use multiple GitHub deploy keys, you need to copy the git and ssh configuration to the container during the build. Otherwise, the Docker build process would still not know how to handle multiple deploy keys. Even if the ssh agent was set up correctly on the runner.
+### Using Multiple Deploy Keys Inside Docker Builds
 
-This requires an additional step in the actions workflow and two additional lines in the Dockerfile.
+When you pass the SSH agent socket to the Docker build environment _and_ want to use multiple GitHub deploy keys, you need to copy the Git and SSH configuration files to the build environment as well. This is necessary _in addition to_ forwarding the SSH agent socket into the build process. The config files are required so that Git can pick the right one from your deployment keys.
+
+This requires an additional step in the workflow file **after** the `ssh-agent` step and **before** the Docker build step.  You also need two additional lines in the `Dockerfile` to actually copy the configs.
+
+The following example will: 
+* collect the necessary Git and SSH configuration files in a directory that must be part of the Docker build context so that... 
+* ... the files can be copied into the Docker image (or an intermediate build stage).
 
 Workflow:
+
 ```yml
-      - name: Prepare git and ssh config for build context
+      - name: ssh-agent setup
+        ...
+
+      - name: Collect Git and SSH config files in a directory that is part of the Docker build context
         run: |
           mkdir root-config
           cp -r ~/.gitconfig  ~/.ssh root-config/
   
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          ssh: |
-            default=${{ env.SSH_AUTH_SOCK }}
+      - name: Docker build 
+        # build-push-action | docker [compose] build | etc.
+        ...
 ```
 
 Dockerfile:
+
 ```Dockerfile
+# Copy the two files in place and fix different path/locations inside the Docker image
 COPY root-config /root/
 RUN sed 's|/home/runner|/root|g' -i.bak /root/.ssh/config
 ```
 
-Have in mind that the Dockerfile now contains customized git and ssh configurations. If you don't want that in your final image, use multi-stage builds.
+Keep in mind that the resulting Docker image now might contain these customized Git and SSH configuration files! Your private SSH keys are never written to files anywhere, just loaded into the SSH agent and forwarded into the container. The config files might, however, give away details about your build or development process and contain the names and URLs of your (private) repositories. You might want to use a multi-staged build to make sure these files do not end up in the final image.
 
+If you still get the error message: `fatal: Could not read from remote repository. Please make sure you have the correct access rights and the repository exists.`, you most likely forgot one of the steps above.
 
 ### Cargo's (Rust) Private Dependencies on Windows
 
