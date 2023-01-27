@@ -322,11 +322,19 @@ const core = __webpack_require__(470);
 const child_process = __webpack_require__(129);
 const fs = __webpack_require__(747);
 const crypto = __webpack_require__(417);
-const { homePath, sshAgentCmd, sshAddCmd, gitCmd } = __webpack_require__(972);
+const { homePath, sshAgentCmdDefault, sshAddCmdDefault, gitCmdDefault } = __webpack_require__(972);
 
 try {
     const privateKey = core.getInput('ssh-private-key');
     const logPublicKey = core.getBooleanInput('log-public-key', {default: true});
+
+    const sshAgentCmdInput = core.getInput('ssh-agent-cmd');
+    const sshAddCmdInput = core.getInput('ssh-add-cmd');
+    const gitCmdInput = core.getInput('git-cmd');
+
+    const sshAgentCmd = sshAgentCmdInput ? sshAgentCmdInput : sshAgentCmdDefault
+    const sshAddCmd = sshAddCmdInput ? sshAddCmdInput : sshAddCmdDefault
+    const gitCmd = gitCmdInput ? gitCmdInput : gitCmdDefault
 
     if (!privateKey) {
         core.setFailed("The ssh-private-key argument is empty. Maybe the secret has not been configured, or you are using a wrong secret name in your workflow file.");
@@ -2906,15 +2914,15 @@ module.exports = (process.env['OS'] != 'Windows_NT') ? {
     // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
     // Action runs, where $HOME is different from the pwent
     homePath: os.userInfo().homedir,
-    sshAgentCmd: 'ssh-agent',
-    sshAddCmd: 'ssh-add',
-    gitCmd: 'git'
+    sshAgentCmdDefault: 'ssh-agent',
+    sshAddCmdDefault: 'ssh-add',
+    gitCmdDefault: 'git'
 } : {
     // Assuming GitHub hosted `windows-*` runners for now
     homePath: os.homedir(),
-    sshAgentCmd: 'c://progra~1//git//usr//bin//ssh-agent.exe',
-    sshAddCmd: 'c://progra~1//git//usr//bin//ssh-add.exe',
-    gitCmd: 'c://progra~1//git//bin//git.exe'
+    sshAgentCmdDefault: 'c://progra~1//git//usr//bin//ssh-agent.exe',
+    sshAddCmdDefault: 'c://progra~1//git//usr//bin//ssh-add.exe',
+    gitCmdDefault: 'c://progra~1//git//bin//git.exe'
 };
 
 

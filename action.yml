@@ -10,6 +10,15 @@ inputs:
         description: 'Whether or not to log public key fingerprints'
         required: false
         default: true
+    ssh-agent-cmd:
+        description: 'ssh-agent command'
+        required: false
+    ssh-add-cmd:
+        description: 'ssh-add command'
+        required: false
+    git-cmd:
+        description: 'git command'
+        required: false
 runs:
     using: 'node16'
     main: 'dist/index.js'
