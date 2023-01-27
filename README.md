@@ -112,7 +112,7 @@ If you are using this action on container-based workflows, make sure the contain
 
 ### Building Docker Images and/or Using the `docker/build-push-action` Action
 
-When you are building Docker images with `docker build` or `docker compose build` and need to provide the SSH keys to the build, don't forget to pass `--ssh default=${{ env.SSH_AUTH_SOCK }}` on the command line to pass the SSH agent socket through.
+When you are building Docker images with `docker build` or `docker compose build` and need to provide the SSH keys to the build, don't forget to pass `--ssh default=${{ env.SSH_AUTH_SOCK }}` on the command line to pass the SSH agent socket through. See the [Docker documentation](https://docs.docker.com/engine/reference/commandline/buildx_build/#ssh) for more information on this option.
 
 If you are using the `docker/build-push-action`, you can do so by adding the following config.
 
