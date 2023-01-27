@@ -110,9 +110,11 @@ If you know that your favorite tool or platform of choice requires extra tweaks 
 
 If you are using this action on container-based workflows, make sure the container has the necessary SSH binaries or package(s) installed.
 
-### Using the `docker/build-push-action` Action
+### Building Docker Images and/or Using the `docker/build-push-action` Action
 
-If you are using the `docker/build-push-action`, and would like to pass the SSH key, you can do so by adding the following config to pass the socket file through:
+When you are building Docker images with `docker build` or `docker compose build` and need to provide the SSH keys to the build, don't forget to pass `--ssh default=${{ env.SSH_AUTH_SOCK }}` on the command line to pass the SSH agent socket through.
+
+If you are using the `docker/build-push-action`, you can do so by adding the following config.
 
 ```yml
       - name: Build and push
@@ -125,14 +127,9 @@ If you are using the `docker/build-push-action`, and would like to pass the SSH 
 
 Make sure not to miss the next section, though.
 
-### Forwarding the SSH agent into Docker build processes, together with multiple Deploy Keys
+### Using Multiple Deploy Keys Inside Docker Builds
 
-If you use one of:
-* the `docker/build-push-action`
-* manual `docker build`
-* manual `docker compose build` 
-
-_and_ want to use multiple GitHub deploy keys, you need to copy the Git and SSH configuration to the container during the build. This is necessary so that Git can pick the right one from your deployment keys. This is necessary _in addition to_ forwarding the SSH agent socket into the build process.
+When you pass the SSH agent socket to the Docker build environment _and_ want to use multiple GitHub deploy keys, you need to copy the Git and SSH configuration files to the build environment as well. This is necessary _in addition to_ forwarding the SSH agent socket into the build process. The config files are required so that Git can pick the right one from your deployment keys.
 
 This requires an additional step in the workflow file **after** the `ssh-agent` step and **before** the Docker build step.  You also need two additional lines in the `Dockerfile` to actually copy the configs.
 
