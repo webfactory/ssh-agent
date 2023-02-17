@@ -9,12 +9,14 @@ jobs:
         runs-on: ${{ matrix.os }}
         steps:
             -   uses: actions/checkout@v3
-            -   name: Setup key
+            -   name: Setup first key
                 uses: ./
                 with:
-                    ssh-private-key: |
-                        ${{ secrets.MPDUDE_TEST_1_DEPLOY_KEY }}
-                        ${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}
+                    ssh-private-key: ${{ secrets.MPDUDE_TEST_1_DEPLOY_KEY }}
+            -   name: Setup second key
+                uses: ./
+                with:
+                    ssh-private-key: ${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}
             -   run: |
                     git clone https://github.com/mpdude/test-1.git test-1-http
                     git clone git@github.com:mpdude/test-1.git test-1-git
@@ -43,4 +45,3 @@ jobs:
                     git clone https://github.com/mpdude/test-2.git test-2-http
                     git clone git@github.com:mpdude/test-2.git test-2-git
                     git clone ssh://git@github.com/mpdude/test-2.git test-2-git-ssh
-

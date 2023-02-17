@@ -351,21 +351,25 @@ try {
     fs.appendFileSync(`${homeSsh}/known_hosts`, '\ngithub.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl\n');
     fs.appendFileSync(`${homeSsh}/known_hosts`, '\ngithub.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==\n');
 
-    console.log("Starting ssh-agent");
-
     const authSock = core.getInput('ssh-auth-sock');
     const sshAgentArgs = (authSock && authSock.length > 0) ? ['-a', authSock] : [];
 
-    // Extract auth socket path and agent pid and set them as job variables
-    child_process.execFileSync(sshAgentCmd, sshAgentArgs).toString().split("\n").forEach(function(line) {
-        const matches = /^(SSH_AUTH_SOCK|SSH_AGENT_PID)=(.*); export \1/.exec(line);
+    if (child_process.spawnSync(sshAdd, ['-l'], { env: { ...process.env, SSH_AUTH_SOCK: authSock || process.env.SSH_AUTH_SOCK } }).status === 0) {
+      console.log('ssh-agent is already running, not starting a new one');
+    } else {
+      console.log("Starting ssh-agent");
 
-        if (matches && matches.length > 0) {
-            // This will also set process.env accordingly, so changes take effect for this script
-            core.exportVariable(matches[1], matches[2])
-            console.log(`${matches[1]}=${matches[2]}`);
-        }
-    });
+       // Extract auth socket path and agent pid and set them as job variables
+      child_process.execFileSync(sshAgent, sshAgentArgs).toString().split("\n").forEach(function(line) {
+          const matches = /^(SSH_AUTH_SOCK|SSH_AGENT_PID)=(.*); export \1/.exec(line);
+
+          if (matches && matches.length > 0) {
+              // This will also set process.env accordingly, so changes take effect for this script
+              core.exportVariable(matches[1], matches[2]);
+              console.log(`${matches[1]}=${matches[2]}`);
+          }
+      });
+    }
 
     console.log("Adding private key(s) to agent");
 
