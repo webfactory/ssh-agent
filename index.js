@@ -37,6 +37,8 @@ try {
         if (matches && matches.length > 0) {
             // This will also set process.env accordingly, so changes take effect for this script
             core.exportVariable(matches[1], matches[2])
+            // Set the output variable for the action
+            core.setOutput(matches[1], matches[2])
             console.log(`${matches[1]}=${matches[2]}`);
         }
     });
