@@ -28,6 +28,11 @@ jobs:
         container:
             image: ubuntu:latest
         steps:
+            - name: "Add GitHub to the SSH known hosts file"
+              run: |
+                mkdir -p -m 0700 /home/runner/.ssh
+                curl --silent https://api.github.com/meta  | jq --raw-output '"github.com "+.ssh_keys[]' >> /home/runner/.ssh/known_hosts
+                chmod 600 /home/runner/.ssh/known_hosts
             -   uses: actions/checkout@v3
             -   run: apt update && apt install -y openssh-client git
             -   name: Setup key
