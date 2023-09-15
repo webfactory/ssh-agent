@@ -342,6 +342,7 @@ const { homePath, sshAgentCmdDefault, sshAddCmdDefault, gitCmdDefault } = __webp
 
 try {
     const privateKey = core.getInput('ssh-private-key');
+    const useBase64 = core.getInput('use-base64');
     const logPublicKey = core.getBooleanInput('log-public-key', {default: true});
 
     const sshAgentCmdInput = core.getInput('ssh-agent-cmd');
@@ -379,7 +380,12 @@ try {
 
     console.log("Adding private key(s) to agent");
 
-    privateKey.split(/(?=-----BEGIN)/).forEach(function(key) {
+    let decodedPrivateKey = privateKey;
+    // base64 decode privateKey
+    if (useBase64 === 'true') {
+        decodedPrivateKey = Buffer.from(privateKey, 'base64').toString('utf8');
+    }
+    decodedPrivateKey.split(/(?=-----BEGIN)/).forEach(function(key) {
         child_process.execFileSync(sshAddCmd, ['-'], { input: key.trim() + "\n" });
     });
 
