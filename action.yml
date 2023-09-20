@@ -1,4 +1,4 @@
-name: 'webfactory/ssh-agent'
+name: 'javbit/ssh-agent'
 description: 'Run `ssh-agent` and load an SSH key to access other private repositories'
 inputs:
     ssh-private-key:
@@ -20,7 +20,7 @@ inputs:
         description: 'git command'
         required: false
 runs:
-    using: 'node16'
+    using: 'node20'
     main: 'dist/index.js'
     post: 'dist/cleanup.js'
     post-if: 'always()'
