@@ -25,21 +25,25 @@ try {
     const homeSsh = homePath + '/.ssh';
     fs.mkdirSync(homeSsh, { recursive: true });
 
-    console.log("Starting ssh-agent");
-
     const authSock = core.getInput('ssh-auth-sock');
     const sshAgentArgs = (authSock && authSock.length > 0) ? ['-a', authSock] : [];
 
-    // Extract auth socket path and agent pid and set them as job variables
-    child_process.execFileSync(sshAgentCmd, sshAgentArgs).toString().split("\n").forEach(function(line) {
-        const matches = /^(SSH_AUTH_SOCK|SSH_AGENT_PID)=(.*); export \1/.exec(line);
+    if (child_process.spawnSync(sshAdd, ['-l'], { env: { ...process.env, SSH_AUTH_SOCK: authSock || process.env.SSH_AUTH_SOCK } }).status === 0) {
+      console.log('ssh-agent is already running, not starting a new one');
+    } else {
+      console.log("Starting ssh-agent");
 
-        if (matches && matches.length > 0) {
-            // This will also set process.env accordingly, so changes take effect for this script
-            core.exportVariable(matches[1], matches[2])
-            console.log(`${matches[1]}=${matches[2]}`);
-        }
-    });
+       // Extract auth socket path and agent pid and set them as job variables
+      child_process.execFileSync(sshAgent, sshAgentArgs).toString().split("\n").forEach(function(line) {
+          const matches = /^(SSH_AUTH_SOCK|SSH_AGENT_PID)=(.*); export \1/.exec(line);
+
+          if (matches && matches.length > 0) {
+              // This will also set process.env accordingly, so changes take effect for this script
+              core.exportVariable(matches[1], matches[2]);
+              console.log(`${matches[1]}=${matches[2]}`);
+          }
+      });
+    }
 
     console.log("Adding private key(s) to agent");
 
