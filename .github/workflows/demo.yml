@@ -8,7 +8,7 @@ jobs:
                 os: [ ubuntu-latest, macOS-latest, windows-latest ]
         runs-on: ${{ matrix.os }}
         steps:
-            -   uses: actions/checkout@v3
+            -   uses: actions/checkout@v4
             -   name: Setup key
                 uses: ./
                 with:
@@ -28,7 +28,7 @@ jobs:
         container:
             image: ubuntu:latest
         steps:
-            -   uses: actions/checkout@v3
+            -   uses: actions/checkout@v4
             -   run: apt update && apt install -y openssh-client git
             -   name: Setup key
                 uses: ./
