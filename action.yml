@@ -20,10 +20,11 @@ inputs:
         description: 'git command'
         required: false
 runs:
-    using: 'node16'
+    using: 'node20'
     main: 'dist/index.js'
     post: 'dist/cleanup.js'
     post-if: 'always()'
+
 branding:
     icon: loader
     color: 'yellow'
