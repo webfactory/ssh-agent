@@ -1,10 +1,9 @@
 # `ssh-agent` GitHub Action
 
-This action 
-* starts the `ssh-agent`, 
-* exports the `SSH_AUTH_SOCK` environment variable, 
-* loads one or several private SSH key into the agent and
-* configures `known_hosts` for GitHub.com.
+This action
+* starts the `ssh-agent`,
+* exports the `SSH_AUTH_SOCK` environment variable, and
+* loads one or several private SSH key into the agent.
 
 It should work in all GitHub Actions virtual environments, including container-based workflows. 
 
