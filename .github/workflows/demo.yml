@@ -7,6 +7,17 @@ jobs:
             matrix:
                 os: [ ubuntu-latest, macOS-latest, windows-latest ]
         runs-on: ${{ matrix.os }}
+        # This job requires some GitHub Secrets. For security reasons, GitHub Secrets are not available
+        # if the pull request was made from a fork. Therefore, we only run this job if either of the
+        # following are true:
+        # 1. This is not a pull request.
+        # 2. This is a pull request, and the pull request was NOT made from a fork.
+        # In particular, we do NOT run this job if this is a pull request, and the pull request WAS
+        # made from a fork.
+        #
+        # The `(github.event_name != 'pull_request')` means "if this isn't a pull request".
+        # The `(github.repository == github.event.pull_request.head.repo.full_name)` means "the pull request is NOT made from a fork".
+        if: (github.event_name != 'pull_request') || (github.repository == github.event.pull_request.head.repo.full_name)
         steps:
             -   uses: actions/checkout@v4
             -   name: Setup key
@@ -27,6 +38,17 @@ jobs:
         runs-on: ubuntu-latest
         container:
             image: ubuntu:latest
+        # This job requires some GitHub Secrets. For security reasons, GitHub Secrets are not available
+        # if the pull request was made from a fork. Therefore, we only run this job if either of the
+        # following are true:
+        # 1. This is not a pull request.
+        # 2. This is a pull request, and the pull request was NOT made from a fork.
+        # In particular, we do NOT run this job if this is a pull request, and the pull request WAS
+        # made from a fork.
+        #
+        # The `(github.event_name != 'pull_request')` means "if this isn't a pull request".
+        # The `(github.repository == github.event.pull_request.head.repo.full_name)` means "the pull request is NOT made from a fork".
+        if: (github.event_name != 'pull_request') || (github.repository == github.event.pull_request.head.repo.full_name)
         steps:
             -   uses: actions/checkout@v4
             -   run: apt update && apt install -y openssh-client git
@@ -43,4 +65,3 @@ jobs:
                     git clone https://github.com/mpdude/test-2.git test-2-http
                     git clone git@github.com:mpdude/test-2.git test-2-git
                     git clone ssh://git@github.com/mpdude/test-2.git test-2-git-ssh
-
