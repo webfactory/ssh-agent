@@ -1,0 +1,40 @@
+name: Build
+on:
+  pull_request:
+  push:
+    branches:
+      - 'master'
+    tags: '*'
+concurrency:
+  # Skip intermediate builds: all builds except for builds on the `master` branch
+  # Cancel intermediate builds: only pull request builds
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref != 'refs/heads/master' || github.run_number }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - run: rm -rf node_modules
+      - run: yarn install --frozen-lockfile
+      - run: npm run build
+      - run: git status
+      - name: "Make sure that the working directory is clean"
+        shell: bash
+        run: | 
+          if [[ -z "$(git status --porcelain)" ]]; then 
+            echo "The working directory is clean"
+          else 
+            echo "The working directory is dirty"
+            exit 1
+          fi
