@@ -1,8 +1,10 @@
 const core = require('@actions/core');
 const { execFileSync } = require('child_process');
-const { sshAgentCmd } = require('./paths.js');
+const { sshAgentCmdDefault } = require('./paths.js');
 
 try {
+    const sshAgentCmdInput = core.getInput('ssh-agent-cmd');
+    const sshAgentCmd = sshAgentCmdInput ? sshAgentCmdInput : sshAgentCmdDefault;
     // Kill the started SSH agent
     console.log('Stopping SSH agent');
     execFileSync(sshAgentCmd, ['-k'], { stdio: 'inherit' });
