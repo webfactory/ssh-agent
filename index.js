@@ -5,7 +5,11 @@ const crypto = require('crypto');
 const { homePath, sshAgentCmdDefault, sshAddCmdDefault, gitCmdDefault } = require('./paths.js');
 
 try {
-    const privateKey = core.getInput('ssh-private-key');
+    let privateKey = core.getInput('ssh-private-key');
+    // Add a newline at the end of the private key if it is not already there
+    if (privateKey && privateKey.slice(-1) !== '\n') {
+        privateKey += '\n';
+    }
     const logPublicKey = core.getBooleanInput('log-public-key', {default: true});
 
     const sshAgentCmdInput = core.getInput('ssh-agent-cmd');
