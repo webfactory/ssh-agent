@@ -5,7 +5,8 @@ const crypto = require('crypto');
 const { homePath, sshAgentCmdDefault, sshAddCmdDefault, gitCmdDefault } = require('./paths.js');
 
 try {
-    const instanceDomain = core.getInput('instance-domain', {default: 'github.com'});
+    const instanceURL = core.getInput('instance-url') || process.env.GITHUB_SERVER_URL || 'https://github.com';
+    const instanceDomain = instanceURL.replace(/^https?:\/\//, '');
     const escapedDomain = instanceDomain.replace(/[-.]/g, '\\$&');
     const regexDomain = new RegExp(`\\b${escapedDomain}[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)`, 'i');
 
@@ -58,7 +59,7 @@ try {
     console.log('Configuring deployment key(s)');
 
     child_process.execFileSync(sshAddCmd, ['-L']).toString().trim().split(/\r?\n/).forEach(function(key) {
-        console.log('Domain regular expression is:', regexDomain);
+        console.log('Instance domain is:', instanceDomain);
         const parts = key.match(regexDomain);
 
         if (!parts) {
