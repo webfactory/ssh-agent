@@ -394,6 +394,7 @@ try {
     console.log('Configuring deployment key(s)');
 
     child_process.execFileSync(sshAddCmd, ['-L']).toString().trim().split(/\r?\n/).forEach(function(key) {
+        console.log('Domain regular expression is:', regexDomain);
         const parts = key.match(regexDomain);
 
         if (!parts) {
