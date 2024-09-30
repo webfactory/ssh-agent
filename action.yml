@@ -1,6 +1,9 @@
 name: 'webfactory/ssh-agent'
 description: 'Run `ssh-agent` and load an SSH key to access other private repositories'
 inputs:
+    instance-domain:
+        description: 'Domain name of the instance (gitea/forgejo)'
+        required: false
     ssh-private-key:
         description: 'Private SSH key to register in the SSH agent'
         required: true

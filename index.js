@@ -5,6 +5,10 @@ const crypto = require('crypto');
 const { homePath, sshAgentCmdDefault, sshAddCmdDefault, gitCmdDefault } = require('./paths.js');
 
 try {
+    const instanceDomain = core.getInput('instance-domain', {default: 'github.com'});
+    const escapedDomain = instanceDomain.replace(/[-.]/g, '\\$&');
+    const regexDomain = new RegExp(`\\b${escapedDomain}[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)`, 'i');
+
     const privateKey = core.getInput('ssh-private-key');
     const logPublicKey = core.getBooleanInput('log-public-key', {default: true});
 
@@ -54,7 +58,7 @@ try {
     console.log('Configuring deployment key(s)');
 
     child_process.execFileSync(sshAddCmd, ['-L']).toString().trim().split(/\r?\n/).forEach(function(key) {
-        const parts = key.match(/\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/i);
+        const parts = key.match(regexDomain);
 
         if (!parts) {
             if (logPublicKey) {
@@ -68,12 +72,12 @@ try {
 
         fs.writeFileSync(`${homeSsh}/key-${sha256}`, key + "\n", { mode: '600' });
 
-        child_process.execSync(`${gitCmd} config --global --replace-all url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "https://github.com/${ownerAndRepo}"`);
-        child_process.execSync(`${gitCmd} config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
-        child_process.execSync(`${gitCmd} config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
+        child_process.execSync(`${gitCmd} config --global --replace-all url."git@key-${sha256}.${instanceDomain}:${ownerAndRepo}".insteadOf "https://${instanceDomain}/${ownerAndRepo}"`);
+        child_process.execSync(`${gitCmd} config --global --add url."git@key-${sha256}.${instanceDomain}:${ownerAndRepo}".insteadOf "git@${instanceDomain}:${ownerAndRepo}"`);
+        child_process.execSync(`${gitCmd} config --global --add url."git@key-${sha256}.${instanceDomain}:${ownerAndRepo}".insteadOf "ssh://git@${instanceDomain}/${ownerAndRepo}"`);
 
-        const sshConfig = `\nHost key-${sha256}.github.com\n`
-                              + `    HostName github.com\n`
+        const sshConfig = `\nHost key-${sha256}.${instanceDomain}\n`
+                              + `    HostName ${instanceDomain}\n`
                               + `    IdentityFile ${homeSsh}/key-${sha256}\n`
                               + `    IdentitiesOnly yes\n`;
 
