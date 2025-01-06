@@ -23,7 +23,9 @@ try {
     }
 
     const homeSsh = homePath + '/.ssh';
-    fs.mkdirSync(homeSsh, { recursive: true });
+    if (!fs.existsSync(buildDir)) {
+        fs.mkdirSync(homeSsh, { recursive: true });
+    }
 
     console.log("Starting ssh-agent");
 
