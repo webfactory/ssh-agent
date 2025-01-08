@@ -1,6 +1,7 @@
 const os = require('os');
+const core = require('@actions/core');
 
-module.exports = (process.env['OS'] != 'Windows_NT') ? {
+const defaults = (process.env['OS'] != 'Windows_NT') ? {
     // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
     // Action runs, where $HOME is different from the pwent
     homePath: os.userInfo().homedir,
@@ -13,4 +14,15 @@ module.exports = (process.env['OS'] != 'Windows_NT') ? {
     sshAgentCmdDefault: 'c://progra~1//git//usr//bin//ssh-agent.exe',
     sshAddCmdDefault: 'c://progra~1//git//usr//bin//ssh-add.exe',
     gitCmdDefault: 'c://progra~1//git//bin//git.exe'
+};
+
+const sshAgentCmdInput = core.getInput('ssh-agent-cmd');
+const sshAddCmdInput = core.getInput('ssh-add-cmd');
+const gitCmdInput = core.getInput('git-cmd');
+
+module.exports = {
+    homePath: defaults.homePath,
+    sshAgentCmd: sshAgentCmdInput !== '' ? sshAgentCmdInput : defaults.sshAgentCmdDefault,
+    sshAddCmd: sshAddCmdInput !== '' ? sshAddCmdInput : defaults.sshAddCmdDefault,
+    gitCmd: gitCmdInput !== '' ? gitCmdInput : defaults.gitCmdDefault,
 };

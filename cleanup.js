@@ -1,4 +1,3 @@
-const core = require('@actions/core');
 const { execFileSync } = require('child_process');
 const { sshAgentCmd } = require('./paths.js');
 
