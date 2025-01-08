@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+* Fix path used to execute ssh-agent in cleanup.js to respect custom paths set by input (#235)
+
+## v0.9.0 [2024-02-06]
+
+### Changed
+
+* Update all versions of `actions/checkout` to v4 (#199)
+* Update to Node 20 (#201)
+
+## v0.8.0 [2023-03-24]
+
+### Changed
+
+* No longer writing GitHub's SSH host keys to `known_hosts` (#171)
+* Update to actions/checkout@v3 (#143)
+* Allow the user to override the commands for git, ssh-agent, and ssh-add (#154)
+
 ## v0.7.0 [2022-10-19]
 
 ### Added

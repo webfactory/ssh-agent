@@ -292,14 +292,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.prepareKeyValueMessage = exports.issueFileCommand = void 0;
+exports.issueCommand = void 0;
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fs = __importStar(__webpack_require__(747));
 const os = __importStar(__webpack_require__(87));
-const uuid_1 = __webpack_require__(62);
 const utils_1 = __webpack_require__(82);
-function issueFileCommand(command, message) {
+function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
     if (!filePath) {
         throw new Error(`Unable to find environment variable for file command ${command}`);
@@ -311,22 +310,7 @@ function issueFileCommand(command, message) {
         encoding: 'utf8'
     });
 }
-exports.issueFileCommand = issueFileCommand;
-function prepareKeyValueMessage(key, value) {
-    const delimiter = `ghadelimiter_${uuid_1.v4()}`;
-    const convertedValue = utils_1.toCommandValue(value);
-    // These should realistically never happen, but just in case someone finds a
-    // way to exploit uuid generation let's not allow keys or values that contain
-    // the delimiter.
-    if (key.includes(delimiter)) {
-        throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter}"`);
-    }
-    if (convertedValue.includes(delimiter)) {
-        throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter}"`);
-    }
-    return `${key}<<${delimiter}${os.EOL}${convertedValue}${os.EOL}${delimiter}`;
-}
-exports.prepareKeyValueMessage = prepareKeyValueMessage;
+exports.issueCommand = issueCommand;
 //# sourceMappingURL=file-command.js.map
 
 /***/ }),
@@ -338,19 +322,11 @@ const core = __webpack_require__(470);
 const child_process = __webpack_require__(129);
 const fs = __webpack_require__(747);
 const crypto = __webpack_require__(417);
-const { homePath, sshAgentCmdDefault, sshAddCmdDefault, gitCmdDefault } = __webpack_require__(972);
+const { homePath, sshAgentCmd, sshAddCmd, gitCmd } = __webpack_require__(972);
 
 try {
     const privateKey = core.getInput('ssh-private-key');
     const logPublicKey = core.getBooleanInput('log-public-key', {default: true});
-
-    const sshAgentCmdInput = core.getInput('ssh-agent-cmd');
-    const sshAddCmdInput = core.getInput('ssh-add-cmd');
-    const gitCmdInput = core.getInput('git-cmd');
-
-    const sshAgentCmd = sshAgentCmdInput ? sshAgentCmdInput : sshAgentCmdDefault;
-    const sshAddCmd = sshAddCmdInput ? sshAddCmdInput : sshAddCmdDefault;
-    const gitCmd = gitCmdInput ? gitCmdInput : gitCmdDefault;
 
     if (!privateKey) {
         core.setFailed("The ssh-private-key argument is empty. Maybe the secret has not been configured, or you are using a wrong secret name in your workflow file.");
@@ -1765,6 +1741,7 @@ const file_command_1 = __webpack_require__(102);
 const utils_1 = __webpack_require__(82);
 const os = __importStar(__webpack_require__(87));
 const path = __importStar(__webpack_require__(622));
+const uuid_1 = __webpack_require__(62);
 const oidc_utils_1 = __webpack_require__(742);
 /**
  * The code to exit an action
@@ -1794,9 +1771,20 @@ function exportVariable(name, val) {
     process.env[name] = convertedVal;
     const filePath = process.env['GITHUB_ENV'] || '';
     if (filePath) {
-        return file_command_1.issueFileCommand('ENV', file_command_1.prepareKeyValueMessage(name, val));
+        const delimiter = `ghadelimiter_${uuid_1.v4()}`;
+        // These should realistically never happen, but just in case someone finds a way to exploit uuid generation let's not allow keys or values that contain the delimiter.
+        if (name.includes(delimiter)) {
+            throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter}"`);
+        }
+        if (convertedVal.includes(delimiter)) {
+            throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter}"`);
+        }
+        const commandValue = `${name}<<${delimiter}${os.EOL}${convertedVal}${os.EOL}${delimiter}`;
+        file_command_1.issueCommand('ENV', commandValue);
     }
-    command_1.issueCommand('set-env', { name }, convertedVal);
+    else {
+        command_1.issueCommand('set-env', { name }, convertedVal);
+    }
 }
 exports.exportVariable = exportVariable;
 /**
@@ -1814,7 +1802,7 @@ exports.setSecret = setSecret;
 function addPath(inputPath) {
     const filePath = process.env['GITHUB_PATH'] || '';
     if (filePath) {
-        file_command_1.issueFileCommand('PATH', inputPath);
+        file_command_1.issueCommand('PATH', inputPath);
     }
     else {
         command_1.issueCommand('add-path', {}, inputPath);
@@ -1854,10 +1842,7 @@ function getMultilineInput(name, options) {
     const inputs = getInput(name, options)
         .split('\n')
         .filter(x => x !== '');
-    if (options && options.trimWhitespace === false) {
-        return inputs;
-    }
-    return inputs.map(input => input.trim());
+    return inputs;
 }
 exports.getMultilineInput = getMultilineInput;
 /**
@@ -1890,12 +1875,8 @@ exports.getBooleanInput = getBooleanInput;
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setOutput(name, value) {
-    const filePath = process.env['GITHUB_OUTPUT'] || '';
-    if (filePath) {
-        return file_command_1.issueFileCommand('OUTPUT', file_command_1.prepareKeyValueMessage(name, value));
-    }
     process.stdout.write(os.EOL);
-    command_1.issueCommand('set-output', { name }, utils_1.toCommandValue(value));
+    command_1.issueCommand('set-output', { name }, value);
 }
 exports.setOutput = setOutput;
 /**
@@ -2024,11 +2005,7 @@ exports.group = group;
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function saveState(name, value) {
-    const filePath = process.env['GITHUB_STATE'] || '';
-    if (filePath) {
-        return file_command_1.issueFileCommand('STATE', file_command_1.prepareKeyValueMessage(name, value));
-    }
-    command_1.issueCommand('save-state', { name }, utils_1.toCommandValue(value));
+    command_1.issueCommand('save-state', { name }, value);
 }
 exports.saveState = saveState;
 /**
@@ -2918,8 +2895,9 @@ exports.default = _default;
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const os = __webpack_require__(87);
+const core = __webpack_require__(470);
 
-module.exports = (process.env['OS'] != 'Windows_NT') ? {
+const defaults = (process.env['OS'] != 'Windows_NT') ? {
     // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
     // Action runs, where $HOME is different from the pwent
     homePath: os.userInfo().homedir,
@@ -2932,6 +2910,17 @@ module.exports = (process.env['OS'] != 'Windows_NT') ? {
     sshAgentCmdDefault: 'c://progra~1//git//usr//bin//ssh-agent.exe',
     sshAddCmdDefault: 'c://progra~1//git//usr//bin//ssh-add.exe',
     gitCmdDefault: 'c://progra~1//git//bin//git.exe'
+};
+
+const sshAgentCmdInput = core.getInput('ssh-agent-cmd');
+const sshAddCmdInput = core.getInput('ssh-add-cmd');
+const gitCmdInput = core.getInput('git-cmd');
+
+module.exports = {
+    homePath: defaults.homePath,
+    sshAgentCmd: sshAgentCmdInput !== '' ? sshAgentCmdInput : defaults.sshAgentCmdDefault,
+    sshAddCmd: sshAddCmdInput !== '' ? sshAddCmdInput : defaults.sshAddCmdDefault,
+    gitCmd: gitCmdInput !== '' ? gitCmdInput : defaults.gitCmdDefault,
 };
 
 

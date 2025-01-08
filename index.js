@@ -2,19 +2,11 @@ const core = require('@actions/core');
 const child_process = require('child_process');
 const fs = require('fs');
 const crypto = require('crypto');
-const { homePath, sshAgentCmdDefault, sshAddCmdDefault, gitCmdDefault } = require('./paths.js');
+const { homePath, sshAgentCmd, sshAddCmd, gitCmd } = require('./paths.js');
 
 try {
     const privateKey = core.getInput('ssh-private-key');
     const logPublicKey = core.getBooleanInput('log-public-key', {default: true});
-
-    const sshAgentCmdInput = core.getInput('ssh-agent-cmd');
-    const sshAddCmdInput = core.getInput('ssh-add-cmd');
-    const gitCmdInput = core.getInput('git-cmd');
-
-    const sshAgentCmd = sshAgentCmdInput ? sshAgentCmdInput : sshAgentCmdDefault;
-    const sshAddCmd = sshAddCmdInput ? sshAddCmdInput : sshAddCmdDefault;
-    const gitCmd = gitCmdInput ? gitCmdInput : gitCmdDefault;
 
     if (!privateKey) {
         core.setFailed("The ssh-private-key argument is empty. Maybe the secret has not been configured, or you are using a wrong secret name in your workflow file.");
