@@ -15,7 +15,7 @@ try {
     }
 
     const homeSsh = homePath + '/.ssh';
-    if (!fs.existsSync(buildDir)) {
+    if (!fs.existsSync(homeSsh)) {
         fs.mkdirSync(homeSsh, { recursive: true });
     }
 
