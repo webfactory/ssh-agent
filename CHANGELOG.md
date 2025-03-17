@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v0.9.1 [2024-03-17]
+
 ### Fixed
 
 * Fix path used to execute ssh-agent in cleanup.js to respect custom paths set by input (#235)
