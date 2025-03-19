@@ -7,6 +7,7 @@ const { homePath, sshAgentCmd, sshAddCmd, gitCmd } = require('./paths.js');
 try {
     const privateKey = core.getInput('ssh-private-key');
     const logPublicKey = core.getBooleanInput('log-public-key', {default: true});
+    const instanceUrls = core.getInput('instance-urls', { required: true });
 
     if (!privateKey) {
         core.setFailed("The ssh-private-key argument is empty. Maybe the secret has not been configured, or you are using a wrong secret name in your workflow file.");
@@ -45,33 +46,42 @@ try {
 
     console.log('Configuring deployment key(s)');
 
-    child_process.execFileSync(sshAddCmd, ['-L']).toString().trim().split(/\r?\n/).forEach(function(key) {
-        const parts = key.match(/\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/i);
+    const instanceUrlsArray = instanceUrls.split(/\r?\n/);
 
-        if (!parts) {
-            if (logPublicKey) {
-              console.log(`Comment for (public) key '${key}' does not match GitHub URL pattern. Not treating it as a GitHub deploy key.`);
+    instanceUrlsArray.forEach(instanceUrl => {
+        const urlPattern = new RegExp(`\\b${instanceUrl.replace(/\./g, '\\.')}[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)`, 'i');
+
+        child_process.execFileSync(sshAddCmd, ['-L']).toString().trim().split(/\r?\n/).forEach(function(key) {
+            const parts = key.match(urlPattern);
+
+            if (!parts) {
+                if (logPublicKey) {
+                console.log(`Comment for (public) key '${key}' does not match ${instanceUrl} URL pattern. Not treating it as a deploy key for ${instanceUrl}.`);
+                }
+                return;
             }
-            return;
-        }
 
-        const sha256 = crypto.createHash('sha256').update(key).digest('hex');
-        const ownerAndRepo = parts[1].replace(/\.git$/, '');
+            const sha256 = crypto.createHash('sha256').update(key).digest('hex');
+            const ownerAndRepo = parts[1].replace(/\.git$/, '');
 
-        fs.writeFileSync(`${homeSsh}/key-${sha256}`, key + "\n", { mode: '600' });
+            fs.writeFileSync(`${homeSsh}/key-${sha256}`, key + "\n", { mode: '600' });
 
-        child_process.execSync(`${gitCmd} config --global --replace-all url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "https://github.com/${ownerAndRepo}"`);
-        child_process.execSync(`${gitCmd} config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
-        child_process.execSync(`${gitCmd} config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
+            const keyHostname = `key-${sha256}.${instanceUrl}`;
 
-        const sshConfig = `\nHost key-${sha256}.github.com\n`
-                              + `    HostName github.com\n`
-                              + `    IdentityFile ${homeSsh}/key-${sha256}\n`
-                              + `    IdentitiesOnly yes\n`;
+            child_process.execSync(`${gitCmd} config --global --replace-all url."git@${keyHostname}:${ownerAndRepo}".insteadOf "https://${instanceUrl}/${ownerAndRepo}"`);
+            child_process.execSync(`${gitCmd} config --global --add url."git@${keyHostname}:${ownerAndRepo}".insteadOf "git@${instanceUrl}:${ownerAndRepo}"`);
+            child_process.execSync(`${gitCmd} config --global --add url."git@${keyHostname}:${ownerAndRepo}".insteadOf "ssh://git@${instanceUrl}/${ownerAndRepo}"`);
 
-        fs.appendFileSync(`${homeSsh}/config`, sshConfig);
+            const sshConfig = `\nHost ${keyHostname}\n`
+                            + `    HostName ${instanceUrl}\n`
+                            + `    IdentityFile ${homeSsh}/key-${sha256}\n`
+                            + `    IdentitiesOnly yes\n`;
 
-        console.log(`Added deploy-key mapping: Use identity '${homeSsh}/key-${sha256}' for GitHub repository ${ownerAndRepo}`);
+            fs.appendFileSync(`${homeSsh}/config`, sshConfig);
+
+            console.log(`Added deploy-key mapping: Use identity '${homeSsh}/key-${sha256}' for ${instanceUrl} repository ${ownerAndRepo}`);
+
+        });
     });
 
 } catch (error) {
