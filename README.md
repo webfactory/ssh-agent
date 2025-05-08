@@ -45,6 +45,8 @@ jobs:
 
 ### Using Multiple Keys
 
+⚠️ Warning: this currently does not work, see [Issue 228](https://github.com/webfactory/ssh-agent/issues/228)
+
 There are cases where you might need to use multiple keys. For example, "[deploy keys](https://docs.github.com/en/developers/overview/managing-deploy-keys#deploy-keys)" might be limited to a single repository, so you'll need several of them.
 
 You can set up different keys as different secrets and pass them all to the action like so:
