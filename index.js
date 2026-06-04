@@ -66,7 +66,9 @@ try {
 
         const sshConfig = `\nHost key-${sha256}.github.com\n`
                               + `    HostName github.com\n`
-                              + `    IdentityFile ${homeSsh}/key-${sha256}\n`
+                              // ssh expands `~` to $HOME.
+                              // This lets the config be copied into a container and used without modification.
+                              + `    IdentityFile ~/.ssh/key-${sha256}\n`
                               + `    IdentitiesOnly yes\n`;
 
         fs.appendFileSync(`${homeSsh}/config`, sshConfig);
