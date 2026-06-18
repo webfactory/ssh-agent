@@ -194,6 +194,25 @@ env:
   CARGO_NET_GIT_FETCH_WITH_CLI: true
 ```
 
+### Poetry's Git Dependencies on GitHub Actions
+
+If you are using Poetry and have private Git dependencies in your `pyproject.toml`, you might encounter an error similar to the following when running your workflow on GitHub:
+
+```
+HangupException
+
+The remote server unexpectedly closed the connection.
+```
+
+This issue occurs because Poetry's default Git client may not work well with the SSH configuration set up by this action. To resolve this, you need to [enable the system Git client in Poetry](https://python-poetry.org/docs/configuration/#system-git-client) by adding the following step to your workflow:
+
+```yaml
+      - name: Enable system Git client
+        run: poetry config system-git-client true
+```
+
+This ensures that Poetry uses the system-installed Git client, which is compatible with the SSH agent configuration provided by this action.
+
 ### Using Deploy Keys with Swift Package Manager
 
 `xcodebuild` by default uses Xcode's built-in Git tooling. If you want to use GitHub Deploy Keys as supported by this action, however, that version of Git will lack the necessary URL remapping. In this case, pass `-scmProvider system` to the `xcodebuild` command, as mentioned in [Apple's documentation](https://developer.apple.com/documentation/swift_packages/building_swift_packages_or_apps_that_use_them_in_continuous_integration_workflows#3680255).
