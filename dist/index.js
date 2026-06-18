@@ -366,32 +366,33 @@ try {
     console.log('Configuring deployment key(s)');
 
     child_process.execFileSync(sshAddCmd, ['-L']).toString().trim().split(/\r?\n/).forEach(function(key) {
-        const parts = key.match(/\bgithub\.com[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/i);
+        const parts = key.match(/\b([_.a-z0-9-]+)[:/]([_.a-z0-9-]+\/[_.a-z0-9-]+)/i);
 
         if (!parts) {
             if (logPublicKey) {
-              console.log(`Comment for (public) key '${key}' does not match GitHub URL pattern. Not treating it as a GitHub deploy key.`);
+            console.log(`Comment for (public) key '${key}' does not match ${url} pattern. Not treating it as a deploy key.`);
             }
             return;
         }
 
         const sha256 = crypto.createHash('sha256').update(key).digest('hex');
-        const ownerAndRepo = parts[1].replace(/\.git$/, '');
+        const url = parts[1]
+        const ownerAndRepo = parts[2].replace(/\.git$/, '');
 
         fs.writeFileSync(`${homeSsh}/key-${sha256}`, key + "\n", { mode: '600' });
 
-        child_process.execSync(`${gitCmd} config --global --replace-all url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "https://github.com/${ownerAndRepo}"`);
-        child_process.execSync(`${gitCmd} config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "git@github.com:${ownerAndRepo}"`);
-        child_process.execSync(`${gitCmd} config --global --add url."git@key-${sha256}.github.com:${ownerAndRepo}".insteadOf "ssh://git@github.com/${ownerAndRepo}"`);
+        child_process.execSync(`${gitCmd} config --global --replace-all url."git@key-${sha256}.${url}:${ownerAndRepo}".insteadOf "https://${url}/${ownerAndRepo}"`);
+        child_process.execSync(`${gitCmd} config --global --add url."git@key-${sha256}.${url}:${ownerAndRepo}".insteadOf "git@${url}:${ownerAndRepo}"`);
+        child_process.execSync(`${gitCmd} config --global --add url."git@key-${sha256}.${url}:${ownerAndRepo}".insteadOf "ssh://git@${url}/${ownerAndRepo}"`);
 
-        const sshConfig = `\nHost key-${sha256}.github.com\n`
-                              + `    HostName github.com\n`
-                              + `    IdentityFile ${homeSsh}/key-${sha256}\n`
-                              + `    IdentitiesOnly yes\n`;
+        const sshConfig = `\nHost key-${sha256}.${url}\n`
+                            + `    HostName ${url}\n`
+                            + `    IdentityFile ${homeSsh}/key-${sha256}\n`
+                            + `    IdentitiesOnly yes\n`;
 
         fs.appendFileSync(`${homeSsh}/config`, sshConfig);
 
-        console.log(`Added deploy-key mapping: Use identity '${homeSsh}/key-${sha256}' for GitHub repository ${ownerAndRepo}`);
+        console.log(`Added deploy-key mapping: Use identity '${homeSsh}/key-${sha256}' for ${url} repository ${ownerAndRepo}`);
     });
 
 } catch (error) {
@@ -2673,8 +2674,8 @@ class OidcClient {
             const res = yield httpclient
                 .getJson(id_token_url)
                 .catch(error => {
-                throw new Error(`Failed to get ID Token. \n 
-        Error Code : ${error.statusCode}\n 
+                throw new Error(`Failed to get ID Token. \n
+        Error Code : ${error.statusCode}\n
         Error Message: ${error.result.message}`);
             });
             const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
