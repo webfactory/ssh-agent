@@ -6,6 +6,18 @@ inputs:
         required: true
     ssh-auth-sock:
         description: 'Where to place the SSH Agent auth socket'
+    instance-urls:
+        description: |-
+          URL(s) of the Git provider instance(s) to use.
+          You can specify multiple instance URls by putting each one on a separate line.
+          ```yaml
+          instance-urls: |-
+              github.com
+              code.forgejo.org
+              codeberg.org
+          ```
+        required: false
+        default: 'github.com'
     log-public-key:
         description: 'Whether or not to log public key fingerprints'
         required: false
