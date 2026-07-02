@@ -26,7 +26,7 @@ GitHub Actions only have access to the repository they run for. So, in order to 
     * In your repository, go to the *Settings > Secrets* menu and create a new secret. In this example, we'll call it `SSH_PRIVATE_KEY`. 
     * Put the contents of the *private* SSH key file into the contents field. <br>
     * This key should start with `-----BEGIN ... PRIVATE KEY-----`, consist of many lines and ends with `-----END ... PRIVATE KEY-----`. 
-5. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v4` line.
+5. In your workflow definition file, add the following step. Preferably this would be rather on top, near the `actions/checkout@v6` line.
 
 ```yaml
 # .github/workflows/my-workflow.yml
@@ -34,9 +34,9 @@ jobs:
     my_job:
         ...
         steps:
-            - uses: actions/checkout@v4
-            # Make sure the @v0.9.0 matches the current version of the action
-            - uses: webfactory/ssh-agent@v0.9.0
+            - uses: actions/checkout@v6
+            # Make sure the @v0.10.0 matches the current version of the action
+            - uses: webfactory/ssh-agent@v0.10.0
               with:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
             # ... other steps
@@ -51,7 +51,7 @@ You can set up different keys as different secrets and pass them all to the acti
 
 ```yaml
 # ... contents as before
-            - uses: webfactory/ssh-agent@v0.9.0
+            - uses: webfactory/ssh-agent@v0.10.0
               with:
                   ssh-private-key: |
                         ${{ secrets.FIRST_KEY }}
@@ -120,7 +120,7 @@ If you are using the `docker/build-push-action`, you can do so by adding the fol
 ```yml
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v7
         with:
           ssh: |
             default=${{ env.SSH_AUTH_SOCK }}
