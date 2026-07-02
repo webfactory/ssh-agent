@@ -156,10 +156,12 @@ Workflow:
 
 Dockerfile:
 
+To prevent errors when building the docker image locally, copy a file which is guaranteed to exist (such as the Dockerfile) along with `root-config`.
+Additionally, before running the `sed` command, confirm the existence of the `/root/.ssh/config` file.
+
 ```Dockerfile
-# Copy the two files in place and fix different path/locations inside the Docker image
-COPY root-config /root/
-RUN sed 's|/home/runner|/root|g' -i.bak /root/.ssh/config
+COPY Dockerfile root-config* /root/
+RUN if [ -f "/root/.ssh/config" ]; then sed 's|/home/runner|/root|g' -i.bak /root/.ssh/config; fi
 ```
 
 Keep in mind that the resulting Docker image now might contain these customized Git and SSH configuration files! Your private SSH keys are never written to files anywhere, just loaded into the SSH agent and forwarded into the container. The config files might, however, give away details about your build or development process and contain the names and URLs of your (private) repositories. You might want to use a multi-staged build to make sure these files do not end up in the final image.
