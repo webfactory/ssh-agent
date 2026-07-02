@@ -157,9 +157,8 @@ Workflow:
 Dockerfile:
 
 ```Dockerfile
-# Copy the two files in place and fix different path/locations inside the Docker image
+# Copy the two files in place
 COPY root-config /root/
-RUN sed 's|/home/runner|/root|g' -i.bak /root/.ssh/config
 ```
 
 Keep in mind that the resulting Docker image now might contain these customized Git and SSH configuration files! Your private SSH keys are never written to files anywhere, just loaded into the SSH agent and forwarded into the container. The config files might, however, give away details about your build or development process and contain the names and URLs of your (private) repositories. You might want to use a multi-staged build to make sure these files do not end up in the final image.
