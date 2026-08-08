@@ -8,39 +8,36 @@ jobs:
                 os: [ ubuntu-latest, macOS-latest, windows-latest ]
         runs-on: ${{ matrix.os }}
         steps:
-            -   uses: actions/checkout@v6
-            -   name: Setup key
-                uses: ./
-                with:
-                    ssh-private-key: |
-                        ${{ secrets.MPDUDE_TEST_1_DEPLOY_KEY }}
-                        ${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}
-            -   run: |
-                    git clone https://github.com/mpdude/test-1.git test-1-http
-                    git clone git@github.com:mpdude/test-1.git test-1-git
-                    git clone ssh://git@github.com/mpdude/test-1.git test-1-git-ssh
-                    git clone https://github.com/mpdude/test-2.git test-2-http
-                    git clone git@github.com:mpdude/test-2.git test-2-git
-                    git clone ssh://git@github.com/mpdude/test-2.git test-2-git-ssh
+            - uses: actions/checkout@v4
+
+            - name: Setup SSH Key
+              uses: webfactory/ssh-agent@v0.9.0
+              with:
+                  ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+            - name: Run sync script
+              run: |
+                  cd /tmp/foss_repo
+                  git pull origin main
 
     docker_demo:
         runs-on: ubuntu-latest
         container:
             image: ubuntu:latest
         steps:
-            -   uses: actions/checkout@v6
-            -   run: apt update && apt install -y openssh-client git
-            -   name: Setup key
-                uses: ./
-                with:
-                    ssh-private-key: |
-                        ${{ secrets.MPDUDE_TEST_1_DEPLOY_KEY }}
-                        ${{ secrets.MPDUDE_TEST_2_DEPLOY_KEY }}
-            -   run: |
-                    git clone https://github.com/mpdude/test-1.git test-1-http
-                    git clone git@github.com:mpdude/test-1.git test-1-git
-                    git clone ssh://git@github.com/mpdude/test-1.git test-1-git-ssh
-                    git clone https://github.com/mpdude/test-2.git test-2-http
-                    git clone git@github.com:mpdude/test-2.git test-2-git
-                    git clone ssh://git@github.com/mpdude/test-2.git test-2-git-ssh
+            - uses: actions/checkout@v4
+            - run: apt update && apt install -y openssh-client git
+            
+            - name: Setup SSH Key
+              uses: webfactory/ssh-agent@v0.9.0
+              with:
+                  ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+            - name: Run clone test script
+              run: |
+                  git clone https://github.com/mpdude/test-1.git test-1-http
+                  git clone git@github.com:mpdude/test-1.git test-1-git
+                  git clone ssh://git@github.com/mpdude/test-1.git test-1-git-ssh
+                  git clone https://github.com/mpdude/test-2.git test-2-http
+                  git clone git@github.com:mpdude/test-2.git test-2-git
+                  git clone ssh://git@github.com/mpdude/test-2.git test-2-git-ssh
