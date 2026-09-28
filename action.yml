@@ -19,6 +19,9 @@ inputs:
     git-cmd:
         description: 'git command'
         required: false
+    home-path:
+        description: 'User home directory override'
+        required: false
 runs:
     using: 'node24'
     main: 'dist/index.js'

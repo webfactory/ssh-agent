@@ -84,6 +84,7 @@ The following inputs can be used to control the action's behavior:
 * `ssh-agent-cmd`: Optional. Use this to specify a custom location for the `ssh-agent` binary.
 * `ssh-add-cmd`: Optional. Use this to specify a custom location for the `ssh-add` binary.
 * `git-cmd`: Optional. Use this to specify a custom location for the `git` binary.
+* `home-path`: Optional. Use this to override user home directory.
 
 ## Exported variables
 
